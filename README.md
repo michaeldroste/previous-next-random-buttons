@@ -1,6 +1,6 @@
 # CMS Prev Next for RapidWeaver Elements
 
-Previous / Random / Next navigation for Elements CMS items. Drop it into a CMS
+Previous / Random / Next navigation for [RapidWeaver Elements](https://www.realmacsoftware.com/elements) CMS items. Drop it into a CMS
 Item page and it finds the neighbouring post on its own — no hidden collection,
 no page picker, no list to maintain.
 
@@ -212,7 +212,7 @@ and where the current item sits in the list. Turn it off before launch.
 
 ## Requirements
 
-RapidWeaver Elements 3.0.9 or later, a page published as `.php`, and placement
+[RapidWeaver Elements](https://www.realmacsoftware.com/elements) 3.0.9 or later, a page published as `.php`, and placement
 inside a CMS Item. No libraries, no build step, no external services.
 
 ## License
