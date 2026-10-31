@@ -1,0 +1,26 @@
+{
+  "identifier": "com.trumpetstudio.cmsprevnext",
+  "author": "Michael Droste",
+  "title": "Prev / Next",
+  "group": "CMS",
+  "helpURL": "https://github.com/michaeldroste/previous-next-random-buttons/releases/",
+  "requiresPhp": true,
+  "deploy": true,
+  "tags": [
+    "previous",
+    "next",
+    "prev",
+    "navigation",
+    "post navigation",
+    "older",
+    "newer",
+    "cms",
+    "collection",
+    "item",
+    "blog",
+    "post",
+    "podcast",
+    "episode",
+    "show notes"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "CMS Prev Next",
+  "identifier": "com.trumpetstudio.cmsprevnextpack",
+  "author": "Michael Droste",
+  "version": 2,
+  "build": 26,
+  "categories": [
+    "components"
+  ]
+}

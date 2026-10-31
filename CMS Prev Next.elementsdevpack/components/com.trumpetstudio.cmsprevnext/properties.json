@@ -1,0 +1,1444 @@
+{
+  "groups": [
+    {
+      "title": "Collection",
+      "icon": "text.book.closed",
+      "properties": [
+        {
+          "title": "Place this inside a CMS Item, in the Before or After zone. It finds the current item's neighbours when the page is requested, so the page must be published with a .php extension.",
+          "information": {}
+        },
+        {
+          "title": "Collection",
+          "id": "collectionPath",
+          "text": {
+            "default": "",
+            "placeholder": "posts",
+            "subtitle": "Leave empty to find the folder automatically."
+          },
+          "info": "Folder of Markdown files, relative to this page. Leave empty and the component looks for a folder of items beside and above the page, which covers the usual Collection plus Item Template layout.",
+          "ai": {
+            "name": "collectionPath",
+            "description": "Folder of CMS Markdown items to read, relative to the page. Empty means find it automatically."
+          }
+        },
+        {
+          "title": "Levels Up",
+          "id": "collectionLevelsUp",
+          "responsive": false,
+          "number": {
+            "default": 0,
+            "min": 0,
+            "max": 8,
+            "step": 1,
+            "round": true,
+            "subtitle": "Folders to climb before applying the path."
+          },
+          "info": "Only needed when the collection folder sits above this page rather than beside it. Ignored while Collection is empty.",
+          "ai": {
+            "name": "collectionLevelsUp",
+            "description": "How many folders to climb from the page before resolving the collection path, 0-8."
+          }
+        },
+        {
+          "title": "Order By",
+          "id": "orderBy",
+          "responsive": false,
+          "select": {
+            "default": "date",
+            "items": [
+              {
+                "value": "date",
+                "title": "Date Published"
+              },
+              {
+                "value": "title",
+                "title": "Title"
+              },
+              {
+                "value": "filename",
+                "title": "File Name"
+              }
+            ]
+          },
+          "info": "Must match the Collection that lists these items, or the neighbours will not match the visible order.",
+          "ai": {
+            "name": "orderBy",
+            "description": "Field the items are sorted by. Must match the listing Collection.",
+            "values": [
+              "date",
+              "title",
+              "filename"
+            ]
+          }
+        },
+        {
+          "title": "Order Direction",
+          "id": "orderDirection",
+          "responsive": false,
+          "select": {
+            "default": "desc",
+            "items": [
+              {
+                "value": "desc",
+                "title": "Descending"
+              },
+              {
+                "value": "asc",
+                "title": "Ascending"
+              }
+            ]
+          },
+          "info": "Must match the Collection that lists these items.",
+          "ai": {
+            "name": "orderDirection",
+            "description": "Sort direction. Must match the listing Collection.",
+            "values": [
+              "desc",
+              "asc"
+            ]
+          }
+        },
+        {
+          "title": "\"Previous\" Means",
+          "id": "previousMeans",
+          "responsive": false,
+          "segmented": {
+            "default": "older",
+            "items": [
+              {
+                "value": "older",
+                "title": "Older"
+              },
+              {
+                "value": "newer",
+                "title": "Newer"
+              }
+            ]
+          },
+          "info": "Which way the Previous button travels. Older is what most readers expect on a blog. This is decided separately from the sort order, so flipping the sort does not silently swap the buttons.",
+          "ai": {
+            "name": "previousMeans",
+            "description": "Whether the Previous button goes to the older or the newer item.",
+            "values": [
+              "older",
+              "newer"
+            ]
+          }
+        },
+        {
+          "divider": {}
+        },
+        {
+          "title": "Which Items Count",
+          "heading": {}
+        },
+        {
+          "title": "These must match the Collection that lists your items, or the neighbours will not match the order your readers see.",
+          "information": {}
+        },
+        {
+          "title": "Status",
+          "id": "statusFilter",
+          "responsive": false,
+          "select": {
+            "default": "published",
+            "items": [
+              {
+                "value": "published",
+                "title": "Published"
+              },
+              {
+                "value": "draft",
+                "title": "Draft"
+              },
+              {
+                "value": "all",
+                "title": "All"
+              }
+            ]
+          },
+          "ai": {
+            "name": "statusFilter",
+            "description": "Which item status counts as a neighbour. Must match the listing Collection.",
+            "values": [
+              "published",
+              "draft",
+              "all"
+            ]
+          }
+        },
+        {
+          "title": "Date",
+          "id": "dateFilter",
+          "responsive": false,
+          "select": {
+            "default": "past",
+            "items": [
+              {
+                "value": "past",
+                "title": "In the past"
+              },
+              {
+                "value": "future",
+                "title": "In the future"
+              },
+              {
+                "value": "all",
+                "title": "All dates"
+              }
+            ]
+          },
+          "info": "In the past keeps scheduled items out of the navigation until their date arrives. The comparison happens when the page is requested, so it stays correct without republishing.",
+          "ai": {
+            "name": "dateFilter",
+            "description": "Which item dates count as neighbours. Must match the listing Collection.",
+            "values": [
+              "past",
+              "future",
+              "all"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Buttons",
+      "icon": "rectangle.on.rectangle",
+      "properties": [
+        {
+          "title": "Style",
+          "id": "buttonStyle",
+          "responsive": false,
+          "segmented": {
+            "default": "buttons",
+            "items": [
+              {
+                "value": "buttons",
+                "title": "Buttons"
+              },
+              {
+                "value": "links",
+                "title": "Text"
+              },
+              {
+                "value": "cards",
+                "title": "Cards"
+              }
+            ]
+          },
+          "info": "Buttons draws a bordered box each side. Text drops the box and border. Cards adds the item's feature image.",
+          "ai": {
+            "name": "buttonStyle",
+            "description": "Overall treatment: bordered buttons, bare text links, or cards with a feature image.",
+            "values": [
+              "buttons",
+              "links",
+              "cards"
+            ]
+          }
+        },
+        {
+          "title": "Show",
+          "id": "pairing",
+          "responsive": false,
+          "segmented": {
+            "default": "pair",
+            "items": [
+              {
+                "value": "pair",
+                "title": "Both"
+              },
+              {
+                "value": "single",
+                "title": "One"
+              }
+            ]
+          },
+          "info": "Both is what readers expect. One is a stronger call to action at the end of show notes, because it points somewhere instead of offering a choice.",
+          "ai": {
+            "name": "pairing",
+            "description": "Show both Previous and Next, or only one of them.",
+            "values": [
+              "pair",
+              "single"
+            ]
+          }
+        },
+        {
+          "title": "Which One",
+          "id": "singleDirection",
+          "responsive": false,
+          "visible": "pairing == 'single'",
+          "select": {
+            "default": "next",
+            "items": [
+              {
+                "value": "next",
+                "title": "Next only"
+              },
+              {
+                "value": "prev",
+                "title": "Previous only"
+              }
+            ]
+          },
+          "ai": {
+            "name": "singleDirection",
+            "description": "Which single button to show when only one is displayed.",
+            "values": [
+              "next",
+              "prev"
+            ],
+            "visible": "pairing == 'single'"
+          }
+        },
+        {
+          "title": "At The Ends",
+          "id": "atEnds",
+          "responsive": false,
+          "segmented": {
+            "default": "hide",
+            "items": [
+              {
+                "value": "hide",
+                "title": "Hide"
+              },
+              {
+                "value": "disable",
+                "title": "Disable"
+              },
+              {
+                "value": "loop",
+                "title": "Loop"
+              }
+            ]
+          },
+          "info": "What the first and last item do when there is no neighbour in one direction. Loop wraps around, which suits an archive meant to be browsed in a circle.",
+          "ai": {
+            "name": "atEnds",
+            "description": "Behaviour on the first and last item: hide the missing button, show it disabled, or wrap around.",
+            "values": [
+              "hide",
+              "disable",
+              "loop"
+            ]
+          }
+        },
+        {
+          "title": "Show Random Button",
+          "id": "showRandom",
+          "responsive": false,
+          "switch": {
+            "default": true,
+            "subtitle": "A third button, between the other two."
+          },
+          "info": "Opens another item from the same collection, chosen at random, so a library can be browsed without an order. It never picks the item being read, and the choice is made when the page is requested rather than when it was published. At The Ends applies to it as well: with only one item there is nowhere random to go.",
+          "ai": {
+            "name": "showRandom",
+            "description": "Show a third button between Previous and Next that opens a randomly chosen item from the same collection."
+          }
+        },
+        {
+          "divider": {}
+        },
+        {
+          "title": "What Each Button Shows",
+          "heading": {}
+        },
+        {
+          "title": "Show Labels",
+          "id": "showLabels",
+          "responsive": false,
+          "switch": {
+            "default": true,
+            "subtitle": "The small Previous / Next wording."
+          },
+          "ai": {
+            "name": "showLabels",
+            "description": "Show the small Previous and Next wording above each item title."
+          }
+        },
+        {
+          "title": "Previous Label",
+          "id": "labelPrevious",
+          "visible": "showLabels == true",
+          "text": {
+            "default": "Previous"
+          },
+          "ai": {
+            "name": "labelPrevious",
+            "description": "Wording for the Previous label.",
+            "visible": "showLabels == true"
+          }
+        },
+        {
+          "title": "Next Label",
+          "id": "labelNext",
+          "visible": "showLabels == true",
+          "text": {
+            "default": "Next"
+          },
+          "ai": {
+            "name": "labelNext",
+            "description": "Wording for the Next label.",
+            "visible": "showLabels == true"
+          }
+        },
+        {
+          "title": "Random Label",
+          "id": "labelRandom",
+          "visible": "showLabels == true && showRandom == true",
+          "text": {
+            "default": "Random"
+          },
+          "ai": {
+            "name": "labelRandom",
+            "description": "Wording for the Random label.",
+            "visible": "showLabels == true && showRandom == true"
+          }
+        },
+        {
+          "title": "Show Item Titles",
+          "id": "showTitles",
+          "responsive": false,
+          "switch": {
+            "default": false,
+            "subtitle": "Adds the neighbouring item's headline."
+          },
+          "ai": {
+            "name": "showTitles",
+            "description": "Show the neighbouring item's headline inside the button."
+          }
+        },
+        {
+          "title": "Show Icons",
+          "id": "showChevrons",
+          "responsive": false,
+          "switch": {
+            "default": true,
+            "subtitle": "Arrows on Previous and Next, dice on Random."
+          },
+          "ai": {
+            "name": "showChevrons",
+            "description": "Show the chevron arrow on Previous and Next, and the dice on Random."
+          }
+        },
+        {
+          "title": "Show Feature Image",
+          "id": "showFeatureImage",
+          "responsive": false,
+          "visible": "buttonStyle == 'cards'",
+          "switch": {
+            "default": true
+          },
+          "info": "Reads the item's image frontmatter. Items without one fall back to text only.",
+          "ai": {
+            "name": "showFeatureImage",
+            "description": "Show the neighbouring item's feature image on the card.",
+            "visible": "buttonStyle == 'cards'"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Font and Text Styles",
+      "icon": "textformat",
+      "properties": [
+        {
+          "title": "Label",
+          "heading": {}
+        },
+        {
+          "title": "Font",
+          "id": "labelFont",
+          "themeFont": {
+            "default": {
+              "base": {
+                "name": "body"
+              }
+            }
+          },
+          "ai": {
+            "name": "labelFont",
+            "description": "Font family for the Previous / Next label."
+          }
+        },
+        {
+          "title": "Size",
+          "id": "labelSize",
+          "themeTextStyle": {
+            "default": {
+              "base": {
+                "name": "lg"
+              }
+            }
+          },
+          "ai": {
+            "name": "labelSize",
+            "description": "Text size for the label, per breakpoint."
+          }
+        },
+        {
+          "title": "Weight",
+          "id": "labelWeight",
+          "select": {
+            "default": "font-semibold",
+            "items": [
+              {
+                "value": "font-normal",
+                "title": "Regular"
+              },
+              {
+                "value": "font-medium",
+                "title": "Medium"
+              },
+              {
+                "value": "font-semibold",
+                "title": "Semibold"
+              },
+              {
+                "value": "font-bold",
+                "title": "Bold"
+              }
+            ]
+          },
+          "ai": {
+            "name": "labelWeight",
+            "description": "Font weight for the label.",
+            "values": [
+              "font-normal",
+              "font-medium",
+              "font-semibold",
+              "font-bold"
+            ]
+          }
+        },
+        {
+          "title": "Letter Spacing",
+          "id": "labelTracking",
+          "select": {
+            "default": "tracking-normal",
+            "items": [
+              {
+                "value": "tracking-normal",
+                "title": "Normal"
+              },
+              {
+                "value": "tracking-wide",
+                "title": "Wide"
+              },
+              {
+                "value": "tracking-wider",
+                "title": "Wider"
+              }
+            ]
+          },
+          "ai": {
+            "name": "labelTracking",
+            "description": "Letter spacing for the label.",
+            "values": [
+              "tracking-normal",
+              "tracking-wide",
+              "tracking-wider"
+            ]
+          }
+        },
+        {
+          "title": "Capitalisation",
+          "id": "labelTransform",
+          "select": {
+            "default": "normal-case",
+            "items": [
+              {
+                "value": "normal-case",
+                "title": "As typed"
+              },
+              {
+                "value": "uppercase",
+                "title": "Upper case"
+              },
+              {
+                "value": "lowercase",
+                "title": "Lower case"
+              },
+              {
+                "value": "capitalize",
+                "title": "Title Case"
+              }
+            ]
+          },
+          "ai": {
+            "name": "labelTransform",
+            "description": "Capitalisation of the label.",
+            "values": [
+              "normal-case",
+              "uppercase",
+              "lowercase",
+              "capitalize"
+            ]
+          }
+        },
+        {
+          "title": "Label",
+          "id": "labelColor",
+          "format": "text-{{value}}",
+          "themeColor": {
+            "default": {
+              "name": "surface",
+              "brightness": 50,
+              "darkName": "surface",
+              "darkBrightness": 50
+            }
+          },
+          "ai": {
+            "name": "labelColor",
+            "description": "Colour of the Previous / Next label."
+          }
+        },
+        {
+          "divider": {}
+        },
+        {
+          "title": "Item Title",
+          "heading": {}
+        },
+        {
+          "title": "Font",
+          "id": "titleFont",
+          "themeFont": {
+            "default": {
+              "base": {
+                "name": "body"
+              }
+            }
+          },
+          "ai": {
+            "name": "titleFont",
+            "description": "Font family for the item title."
+          }
+        },
+        {
+          "title": "Size",
+          "id": "titleSize",
+          "themeTextStyle": {
+            "default": {
+              "base": {
+                "name": "lg"
+              }
+            }
+          },
+          "ai": {
+            "name": "titleSize",
+            "description": "Text size for the item title, per breakpoint."
+          }
+        },
+        {
+          "title": "Weight",
+          "id": "titleWeight",
+          "select": {
+            "default": "font-semibold",
+            "items": [
+              {
+                "value": "font-normal",
+                "title": "Regular"
+              },
+              {
+                "value": "font-medium",
+                "title": "Medium"
+              },
+              {
+                "value": "font-semibold",
+                "title": "Semibold"
+              },
+              {
+                "value": "font-bold",
+                "title": "Bold"
+              }
+            ]
+          },
+          "ai": {
+            "name": "titleWeight",
+            "description": "Font weight for the item title.",
+            "values": [
+              "font-normal",
+              "font-medium",
+              "font-semibold",
+              "font-bold"
+            ]
+          }
+        },
+        {
+          "title": "Line Height",
+          "id": "titleLeading",
+          "select": {
+            "default": "leading-snug",
+            "items": [
+              {
+                "value": "leading-tight",
+                "title": "Tight"
+              },
+              {
+                "value": "leading-snug",
+                "title": "Snug"
+              },
+              {
+                "value": "leading-normal",
+                "title": "Normal"
+              },
+              {
+                "value": "leading-relaxed",
+                "title": "Relaxed"
+              }
+            ]
+          },
+          "ai": {
+            "name": "titleLeading",
+            "description": "Line height for the item title.",
+            "values": [
+              "leading-tight",
+              "leading-snug",
+              "leading-normal",
+              "leading-relaxed"
+            ]
+          }
+        },
+        {
+          "title": "Maximum Lines",
+          "id": "titleClamp",
+          "responsive": false,
+          "select": {
+            "default": "2",
+            "items": [
+              {
+                "value": "1",
+                "title": "1 line"
+              },
+              {
+                "value": "2",
+                "title": "2 lines"
+              },
+              {
+                "value": "3",
+                "title": "3 lines"
+              },
+              {
+                "value": "none",
+                "title": "No limit"
+              }
+            ]
+          },
+          "info": "Long headlines are trimmed with an ellipsis so the two buttons stay the same height.",
+          "ai": {
+            "name": "titleClamp",
+            "description": "Maximum number of lines for the item title before it is trimmed.",
+            "values": [
+              "1",
+              "2",
+              "3",
+              "none"
+            ]
+          }
+        },
+        {
+          "title": "Title",
+          "id": "titleColor",
+          "format": "text-{{value}}",
+          "themeColor": {
+            "default": {
+              "name": "surface",
+              "brightness": 50,
+              "darkName": "surface",
+              "darkBrightness": 50
+            }
+          },
+          "ai": {
+            "name": "titleColor",
+            "description": "Colour of the item title."
+          }
+        },
+        {
+          "title": "Title (Hover)",
+          "id": "titleColorHover",
+          "format": "group-hover/prevnext:text-{{value}}",
+          "themeColor": {
+            "hover": {
+              "name": "surface",
+              "brightness": 50,
+              "darkName": "surface",
+              "darkBrightness": 50
+            }
+          },
+          "info": "Applied when the button is hovered, not only the text itself.",
+          "ai": {
+            "name": "titleColorHover",
+            "description": "Colour of the item title when the button is hovered."
+          }
+        },
+        {
+          "divider": {}
+        },
+        {
+          "title": "Arrow",
+          "heading": {}
+        },
+        {
+          "title": "Weight",
+          "id": "chevronWeight",
+          "responsive": false,
+          "select": {
+            "default": "3",
+            "items": [
+              {
+                "value": "1.5",
+                "title": "Regular"
+              },
+              {
+                "value": "2",
+                "title": "Medium"
+              },
+              {
+                "value": "2.5",
+                "title": "Semibold"
+              },
+              {
+                "value": "3",
+                "title": "Bold"
+              }
+            ]
+          },
+          "info": "How heavily the arrow is drawn. The four choices are the four the Label and Item Title use, and they are named after them, so the arrow stops reading as a lighter afterthought beside the wording. It ships a step above the Label weight because an open stroke reads thinner than solid letterforms at the same nominal weight; matching the Label weight exactly is the other sensible setting.",
+          "ai": {
+            "name": "chevronWeight",
+            "description": "Stroke weight of the chevron arrow, on the same Regular / Medium / Semibold / Bold scale as the label. Defaults a step heavier than the label because an open stroke reads thinner than text.",
+            "values": [
+              "1.5",
+              "2",
+              "2.5",
+              "3"
+            ]
+          }
+        },
+        {
+          "title": "Arrow",
+          "id": "chevronColor",
+          "format": "text-{{value}}",
+          "themeColor": {
+            "default": {
+              "name": "surface",
+              "brightness": 50,
+              "darkName": "surface",
+              "darkBrightness": 50
+            }
+          },
+          "ai": {
+            "name": "chevronColor",
+            "description": "Colour of the chevron arrow."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Layout",
+      "icon": "square.split.2x1",
+      "properties": [
+        {
+          "title": "Horizontal Gap",
+          "id": "gapHorizontal",
+          "format": "gap-x-[calc({{value}}*0.25rem)]",
+          "slider": {
+            "default": 10,
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "round": true
+          },
+          "info": "Space between the buttons while they sit side by side. Steps of the spacing scale, the same numbers the Padding and Margin controls use, so 4 here matches a padding of 4. It starts at 10 because there are three buttons: the distance that separates a pair reads as a gulf once a third sits between them.",
+          "ai": {
+            "name": "gapHorizontal",
+            "description": "Space between the buttons while they are side by side, 0-50 on the spacing scale, per breakpoint."
+          }
+        },
+        {
+          "title": "Align To Edges",
+          "id": "alignToEdges",
+          "responsive": false,
+          "switch": {
+            "default": false,
+            "subtitle": "Previous left, Next right."
+          },
+          "info": "On pushes the two buttons to opposite ends of the content, the usual blog convention. Off keeps them together as a centred pair, which sits better in a wide column and lines up with anything else centred below them.",
+          "ai": {
+            "name": "alignToEdges",
+            "description": "Push Previous to the left edge and Next to the right edge."
+          }
+        },
+        {
+          "title": "Stack On Mobile",
+          "id": "stackOnMobile",
+          "responsive": false,
+          "switch": {
+            "default": true
+          },
+          "info": "One button per row on narrow screens. Only the direction changes: each button keeps the wording size, padding and width it has on a wide screen.",
+          "ai": {
+            "name": "stackOnMobile",
+            "description": "Stack the buttons vertically on narrow screens."
+          }
+        },
+        {
+          "title": "Vertical Gap",
+          "id": "gapVertical",
+          "visible": "stackOnMobile == true",
+          "format": "gap-y-[calc({{value}}*0.25rem)]",
+          "slider": {
+            "default": 5,
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "round": true
+          },
+          "info": "Space between the buttons once they stack. Same spacing scale as Horizontal Gap, and it starts far lower on purpose: stacked buttons are read as a short list, and the distance that separates a pair side by side reads as a gulf one above the other. Hidden while Stack On Mobile is off, because a single row has nothing to separate vertically.",
+          "ai": {
+            "name": "gapVertical",
+            "description": "Space between the buttons once they stack on a narrow screen, 0-50 on the spacing scale, per breakpoint.",
+            "visible": "stackOnMobile == true"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Sizing",
+      "icon": "arrow.up.left.and.arrow.down.right",
+      "properties": [
+        {
+          "title": "Button Width",
+          "id": "buttonWidth",
+          "responsive": false,
+          "segmented": {
+            "default": "match",
+            "items": [
+              {
+                "value": "match",
+                "title": "Match"
+              },
+              {
+                "value": "fit",
+                "title": "Fit text"
+              },
+              {
+                "value": "equal",
+                "title": "Equal halves"
+              }
+            ]
+          },
+          "info": "Match grows the shorter button to the size of the longer one, so a four-letter Next lines up with an eight-letter Previous instead of sitting noticeably thinner. Fit text lets each button hug its own wording. Equal halves stretches both across the whole width, which reads better once item titles are switched on. Align To Edges needs the full width to push the pair apart, and equal buttons filling it are equal halves by another name, so Match becomes Equal halves under it. Showing only one button leaves nothing to match, so Match behaves as Fit text there.",
+          "ai": {
+            "name": "buttonWidth",
+            "description": "Whether both buttons take the width of the wider one, each hugs its own text, or both stretch to an equal half.",
+            "values": [
+              "match",
+              "fit",
+              "equal"
+            ]
+          }
+        },
+        {
+          "title": "Minimum Width",
+          "id": "minWidth",
+          "format": "min-w-[{{value}}rem]",
+          "slider": {
+            "default": 0,
+            "min": 0,
+            "max": 24,
+            "step": 1,
+            "units": "rem",
+            "round": true
+          },
+          "info": "Floor for each button's width. Match already lines the pair up on its own, so this is for giving both buttons more room than their wording needs, or for evening up a pair set to Fit text.",
+          "ai": {
+            "name": "minWidth",
+            "description": "Minimum width of each button in rem, 0-24. 0 means no minimum."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Spacing",
+      "icon": "square.dashed.inset.filled",
+      "properties": [
+        {
+          "title": "Margin",
+          "id": "outerSpacing",
+          "themeSpacing": {
+            "mode": "margin",
+            "default": {
+              "base": {
+                "top": "10",
+                "right": "0",
+                "bottom": "0",
+                "left": "0"
+              }
+            }
+          },
+          "info": "Space outside the buttons. The top value is what separates them from the content above, which is usually the only one worth changing.",
+          "ai": {
+            "name": "outerSpacing",
+            "description": "Margin outside the whole navigation, per side and breakpoint. Top separates it from the content above."
+          }
+        },
+        {
+          "title": "Padding",
+          "id": "buttonPadding",
+          "themeSpacing": {
+            "mode": "padding",
+            "default": {
+              "base": {
+                "top": "2",
+                "right": "8",
+                "bottom": "2",
+                "left": "8"
+              }
+            }
+          },
+          "info": "Padding inside each button. The top and bottom values set how tall the pill is around the wording, so they want raising again if you take the Label size much past large.",
+          "ai": {
+            "name": "buttonPadding",
+            "description": "Padding inside each button, per side and breakpoint."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Transitions",
+      "icon": "sparkles",
+      "properties": [
+        {
+          "title": "Hover Transition",
+          "id": "hasHoverTransition",
+          "responsive": false,
+          "switch": {
+            "default": true
+          },
+          "info": "Eases the colour change on hover. Respects the visitor's reduced-motion setting.",
+          "ai": {
+            "name": "hasHoverTransition",
+            "description": "Ease the hover colour change instead of switching instantly."
+          }
+        },
+        {
+          "title": "Duration",
+          "id": "transitionDuration",
+          "visible": "hasHoverTransition == true",
+          "select": {
+            "default": "duration-200",
+            "items": [
+              {
+                "value": "duration-150",
+                "title": "Fast"
+              },
+              {
+                "value": "duration-200",
+                "title": "Normal"
+              },
+              {
+                "value": "duration-300",
+                "title": "Relaxed"
+              },
+              {
+                "value": "duration-500",
+                "title": "Slow"
+              }
+            ]
+          },
+          "ai": {
+            "name": "transitionDuration",
+            "description": "How long the hover transition takes.",
+            "values": [
+              "duration-150",
+              "duration-200",
+              "duration-300",
+              "duration-500"
+            ],
+            "visible": "hasHoverTransition == true"
+          }
+        },
+        {
+          "title": "Easing",
+          "id": "transitionEasing",
+          "visible": "hasHoverTransition == true",
+          "select": {
+            "default": "ease-out",
+            "items": [
+              {
+                "value": "ease-linear",
+                "title": "Linear"
+              },
+              {
+                "value": "ease-in",
+                "title": "Ease in"
+              },
+              {
+                "value": "ease-out",
+                "title": "Ease out"
+              },
+              {
+                "value": "ease-in-out",
+                "title": "Ease in out"
+              }
+            ]
+          },
+          "ai": {
+            "name": "transitionEasing",
+            "description": "Easing curve of the hover transition.",
+            "values": [
+              "ease-linear",
+              "ease-in",
+              "ease-out",
+              "ease-in-out"
+            ],
+            "visible": "hasHoverTransition == true"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Effects",
+      "icon": "circle.lefthalf.filled",
+      "properties": [
+        {
+          "title": "Shadow",
+          "id": "buttonShadow",
+          "themeShadow": {
+            "mode": "box",
+            "default": {
+              "name": "sm"
+            }
+          },
+          "ai": {
+            "name": "buttonShadow",
+            "description": "Shadow depth behind each button."
+          }
+        },
+        {
+          "title": "Hover Lift",
+          "id": "hoverLift",
+          "format": "hover:{{value}}",
+          "select": {
+            "default": "translate-y-0",
+            "items": [
+              {
+                "value": "translate-y-0",
+                "title": "None"
+              },
+              {
+                "value": "-translate-y-0.5",
+                "title": "Subtle"
+              },
+              {
+                "value": "-translate-y-1",
+                "title": "Medium"
+              },
+              {
+                "value": "-translate-y-2",
+                "title": "Strong"
+              }
+            ]
+          },
+          "info": "Raises the button slightly under the pointer. Needs Hover Transition on to animate, and is skipped for visitors who ask for reduced motion.",
+          "ai": {
+            "name": "hoverLift",
+            "description": "How far the button rises on hover.",
+            "values": [
+              "translate-y-0",
+              "-translate-y-0.5",
+              "-translate-y-1",
+              "-translate-y-2"
+            ]
+          }
+        },
+        {
+          "title": "Opacity",
+          "id": "navOpacity",
+          "format": "opacity-[{{value}}%]",
+          "slider": {
+            "default": 100,
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "units": "%",
+            "round": true
+          },
+          "info": "Opacity of the whole navigation.",
+          "ai": {
+            "name": "navOpacity",
+            "description": "Opacity of the whole navigation, 0-100."
+          }
+        },
+        {
+          "title": "Disabled Opacity",
+          "id": "disabledOpacity",
+          "visible": "atEnds == 'disable'",
+          "format": "opacity-[{{value}}%]",
+          "slider": {
+            "default": 40,
+            "min": 10,
+            "max": 100,
+            "step": 5,
+            "units": "%",
+            "round": true
+          },
+          "info": "How faint a button looks when there is no neighbour that way.",
+          "ai": {
+            "name": "disabledOpacity",
+            "description": "Opacity of a disabled button, 10-100.",
+            "visible": "atEnds == 'disable'"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Background",
+      "icon": "paintbrush",
+      "properties": [
+        {
+          "title": "Background",
+          "id": "buttonBg",
+          "format": "bg-{{value}}",
+          "themeColor": {
+            "default": {
+              "name": "brand",
+              "brightness": 500,
+              "darkName": "brand",
+              "darkBrightness": 600
+            }
+          },
+          "ai": {
+            "name": "buttonBg",
+            "description": "Button background colour."
+          }
+        },
+        {
+          "title": "Background (Hover)",
+          "id": "buttonBgHover",
+          "format": "hover:bg-{{value}}",
+          "themeColor": {
+            "hover": {
+              "name": "accent",
+              "brightness": 500,
+              "darkName": "accent",
+              "darkBrightness": 600
+            }
+          },
+          "info": "Your theme's accent colour, at the same depth as the background above it, so hovering changes the hue and nothing else. Set it to a step of brand instead if you would rather the button only darkened.",
+          "ai": {
+            "name": "buttonBgHover",
+            "description": "Button background colour on hover. Defaults to the theme accent at the same brightness as the background, so only the hue changes."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Borders",
+      "icon": "rectangle.dashed",
+      "properties": [
+        {
+          "title": "Show Border",
+          "id": "showBorder",
+          "responsive": false,
+          "switch": {
+            "default": false
+          },
+          "ai": {
+            "name": "showBorder",
+            "description": "Draw a border around each button."
+          }
+        },
+        {
+          "title": "Width",
+          "id": "borderWidth",
+          "visible": "showBorder == true",
+          "themeBorderWidth": {
+            "default": {
+              "base": {
+                "top": "1",
+                "right": "1",
+                "bottom": "1",
+                "left": "1",
+                "linkHorizontal": true,
+                "linkVertical": true
+              }
+            }
+          },
+          "ai": {
+            "name": "borderWidth",
+            "description": "Button border thickness, per side.",
+            "visible": "showBorder == true"
+          }
+        },
+        {
+          "title": "Style",
+          "id": "borderStyle",
+          "visible": "showBorder == true",
+          "select": {
+            "default": "border-solid",
+            "items": [
+              {
+                "value": "border-solid",
+                "title": "Solid"
+              },
+              {
+                "value": "border-dashed",
+                "title": "Dashed"
+              },
+              {
+                "value": "border-dotted",
+                "title": "Dotted"
+              }
+            ]
+          },
+          "ai": {
+            "name": "borderStyle",
+            "description": "Button border line style.",
+            "values": [
+              "border-solid",
+              "border-dashed",
+              "border-dotted"
+            ],
+            "visible": "showBorder == true"
+          }
+        },
+        {
+          "title": "Border",
+          "id": "borderColor",
+          "visible": "showBorder == true",
+          "format": "border-{{value}}",
+          "themeColor": {
+            "default": {
+              "name": "brand",
+              "brightness": 500,
+              "darkName": "brand",
+              "darkBrightness": 400
+            }
+          },
+          "ai": {
+            "name": "borderColor",
+            "description": "Button border colour.",
+            "visible": "showBorder == true"
+          }
+        },
+        {
+          "title": "Border (Hover)",
+          "id": "borderColorHover",
+          "visible": "showBorder == true",
+          "format": "hover:border-{{value}}",
+          "themeColor": {
+            "hover": {
+              "name": "brand",
+              "brightness": 500,
+              "darkName": "brand",
+              "darkBrightness": 400
+            }
+          },
+          "ai": {
+            "name": "borderColorHover",
+            "description": "Button border colour on hover.",
+            "visible": "showBorder == true"
+          }
+        },
+        {
+          "divider": {}
+        },
+        {
+          "title": "Corners",
+          "heading": {}
+        },
+        {
+          "title": "Corner Radius",
+          "id": "cornerRadius",
+          "themeBorderRadius": {
+            "default": {
+              "base": {
+                "topLeft": "2xl",
+                "topRight": "2xl",
+                "bottomLeft": "2xl",
+                "bottomRight": "2xl"
+              }
+            }
+          },
+          "info": "Rounding of the button corners. Full makes a pill of any button, whatever its height; a fixed radius like this one keeps its shape as the padding changes, and stays a rounded rectangle rather than becoming a lozenge.",
+          "ai": {
+            "name": "cornerRadius",
+            "description": "Corner radius of each button."
+          }
+        },
+        {
+          "title": "Image Radius",
+          "id": "imageRadius",
+          "visible": "buttonStyle == 'cards'",
+          "themeBorderRadius": {
+            "default": {
+              "base": {
+                "topLeft": "md",
+                "topRight": "md",
+                "bottomLeft": "md",
+                "bottomRight": "md"
+              }
+            }
+          },
+          "ai": {
+            "name": "imageRadius",
+            "description": "Corner radius of the feature image on cards.",
+            "visible": "buttonStyle == 'cards'"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Advanced",
+      "icon": "gearshape",
+      "properties": [
+        {
+          "title": "Diagnostics",
+          "id": "showDiagnostics",
+          "responsive": false,
+          "switch": {
+            "default": false,
+            "subtitle": "Print why nothing rendered."
+          },
+          "info": "Leaves an HTML comment in the page source explaining what the component looked for and what it found. Switch it off once the navigation works.",
+          "ai": {
+            "name": "showDiagnostics",
+            "description": "Write a diagnostic HTML comment into the page source explaining what was found."
+          }
+        },
+        {
+          "title": "CSS Classes",
+          "id": "cssClasses",
+          "text": {
+            "default": "",
+            "placeholder": "my-class another-class"
+          },
+          "info": "Added to the component's outer element.",
+          "ai": {
+            "name": "cssClasses",
+            "description": "Extra CSS classes for the outer element."
+          }
+        },
+        {
+          "title": "ID",
+          "id": "customId",
+          "text": {
+            "default": "",
+            "placeholder": "post-nav"
+          },
+          "info": "Sets the id attribute on the outer element, for linking or custom CSS.",
+          "ai": {
+            "name": "customId",
+            "description": "HTML id attribute for the outer element."
+          }
+        }
+      ]
+    }
+  ]
+}

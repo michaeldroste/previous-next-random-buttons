@@ -1,0 +1,1194 @@
+<!--
+  Prev / Next - main template.
+
+  Two branches. The edit canvas gets representative structure, because PHP
+  cannot run there and an author needs to see their styling on something. The
+  published page runs the real thing at request time.
+
+  Rules that have each cost a build here, so they are worth restating:
+
+  - The template lexer reads comments. A brace pair around a non-variable is a
+    hard error even inside a comment, and naming a block directive in prose
+    counts as opening or closing one. Directives are therefore described in
+    words below, never written out.
+  - Condition names are matched by prefix against the built-in keywords, so no
+    flag tested below may begin with edit, preview, publish, true or false.
+    Placeholder flags are named for the placeholder instead.
+  - Conditions take one test each. Anything compound is resolved in hooks.js.
+-->
+
+@if(isEdit)
+
+<!--
+  Edit canvas. Structural, not a screenshot: the real class strings are applied
+  to sample neighbours so padding, radius, colour and type all preview live.
+  Component stylesheets lose to Tailwind utilities here, so everything is a
+  utility class.
+-->
+<div class="flex {{navOpacity}} {{outerSpacing}} {{gapHorizontal}} {{gapVertical}} @if(stacksOnMobile)flex-col sm:flex-row@else flex-row@endif {{rowJustify}} {{rowAlign}}">
+  @if(widthIsMatch)<div class="{{matchGrid}} {{gapHorizontal}} {{gapVertical}}">@endif
+
+  @if(showsPrevious)
+  <span class="group/prevnext flex min-w-0 {{growClass}} items-center justify-center gap-3 no-underline {{minWidth}} {{buttonPadding}} {{cornerRadius}} {{buttonShadow}} @if(hasHoverTransition){{hoverLift}}@endif @if(styleIsButtons){{buttonBg}} {{buttonBgHover}}@endif @if(styleIsCards){{buttonBg}} {{buttonBgHover}}@endif @if(hasBorder){{borderWidth}} {{borderStyle}} {{borderColor}} {{borderColorHover}}@endif @if(hasHoverTransition)motion-safe:transition motion-safe:{{transitionDuration}} motion-safe:{{transitionEasing}}@endif">
+    @if(showsChevrons)
+    <svg class="h-5 w-5 shrink-0 {{chevronColor}}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{chevronStroke}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 L9 12 L15 6" /></svg>
+    @endif
+    @if(wantsImage)
+    <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden bg-surface-200 {{imageRadius}} dark:bg-surface-700">
+      <svg class="h-5 w-5 {{chevronColor}}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5h18v14H3z" /><path d="M3 16l5-5 4 4 3-3 6 6" /></svg>
+    </span>
+    @endif
+    <span class="{{textWrapClass}}">
+      @if(showsLabels)
+      <span class="block {{labelFont}} {{labelSize}} {{labelWeight}} {{labelTracking}} {{labelTransform}} {{labelColor}}">{{labelPreviousText}}</span>
+      @endif
+      @if(showsTitles)
+      <span class="block {{titleClampClass}} {{titleFont}} {{titleSize}} {{titleWeight}} {{titleLeading}} {{titleColor}} {{titleColorHover}}">{{placeholderPrevious}}</span>
+      @endif
+    </span>
+  </span>
+  @endif
+
+  <!--
+    Random. Third cell, so it lands between the other two in every justify mode
+    and in the Match grid alike. It carries no item title and no feature image
+    on purpose: both would name the item behind the button, and a destination
+    you can read before you click it is not a random one. The dice and the
+    label are the whole button.
+  -->
+  @if(showsRandom)
+  <span class="group/prevnext flex min-w-0 {{growClass}} items-center justify-center gap-3 no-underline {{minWidth}} {{buttonPadding}} {{cornerRadius}} {{buttonShadow}} @if(hasHoverTransition){{hoverLift}}@endif @if(styleIsButtons){{buttonBg}} {{buttonBgHover}}@endif @if(styleIsCards){{buttonBg}} {{buttonBgHover}}@endif @if(hasBorder){{borderWidth}} {{borderStyle}} {{borderColor}} {{borderColorHover}}@endif @if(hasHoverTransition)motion-safe:transition motion-safe:{{transitionDuration}} motion-safe:{{transitionEasing}}@endif">
+    @if(showsChevrons)
+    <svg class="h-5 w-6 shrink-0 {{chevronColor}}" viewBox="0 0 30 24" fill="none" stroke="currentColor" stroke-width="{{diceStroke}}" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="6" width="12" height="12" rx="2.4" /><rect x="17" y="6" width="12" height="12" rx="2.4" /><g fill="currentColor" stroke="none"><circle cx="4" cy="9" r="1.4" /><circle cx="7" cy="12" r="1.4" /><circle cx="10" cy="15" r="1.4" /><circle cx="20" cy="9" r="1.4" /><circle cx="26" cy="15" r="1.4" /></g></svg>
+    @endif
+    <span class="{{textWrapClass}}">
+      @if(showsLabels)
+      <span class="block {{labelFont}} {{labelSize}} {{labelWeight}} {{labelTracking}} {{labelTransform}} {{labelColor}}">{{labelRandomText}}</span>
+      @endif
+    </span>
+  </span>
+  @endif
+
+  @if(showsNext)
+  <span class="group/prevnext flex min-w-0 {{growClass}} items-center justify-center gap-3 no-underline flex-row-reverse @if(alignsToEdges)text-right@endif {{minWidth}} {{buttonPadding}} {{cornerRadius}} {{buttonShadow}} @if(hasHoverTransition){{hoverLift}}@endif @if(styleIsButtons){{buttonBg}} {{buttonBgHover}}@endif @if(styleIsCards){{buttonBg}} {{buttonBgHover}}@endif @if(hasBorder){{borderWidth}} {{borderStyle}} {{borderColor}} {{borderColorHover}}@endif @if(hasHoverTransition)motion-safe:transition motion-safe:{{transitionDuration}} motion-safe:{{transitionEasing}}@endif">
+    @if(showsChevrons)
+    <svg class="h-5 w-5 shrink-0 {{chevronColor}}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{chevronStroke}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18 L15 12 L9 6" /></svg>
+    @endif
+    @if(wantsImage)
+    <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden bg-surface-200 {{imageRadius}} dark:bg-surface-700">
+      <svg class="h-5 w-5 {{chevronColor}}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5h18v14H3z" /><path d="M3 16l5-5 4 4 3-3 6 6" /></svg>
+    </span>
+    @endif
+    <span class="{{textWrapClass}}">
+      @if(showsLabels)
+      <span class="block {{labelFont}} {{labelSize}} {{labelWeight}} {{labelTracking}} {{labelTransform}} {{labelColor}}">{{labelNextText}}</span>
+      @endif
+      @if(showsTitles)
+      <span class="block {{titleClampClass}} {{titleFont}} {{titleSize}} {{titleWeight}} {{titleLeading}} {{titleColor}} {{titleColorHover}}">{{placeholderNext}}</span>
+      @endif
+    </span>
+  </span>
+  @endif
+
+  @if(widthIsMatch)</div>@endif
+</div>
+
+<p class="mt-2 rounded-[0.25rem] bg-surface-100 px-2 py-1 text-xs text-surface-600 dark:bg-surface-800 dark:text-surface-300">
+  Sample neighbours. The real titles are read when the page is requested, so
+  this needs a page published with a .php extension, and this component has to
+  sit inside a CMS Item.
+</p>
+
+@if(randomIsEmpty)
+<p class="mt-2 rounded-[0.25rem] bg-amber-100 px-2 py-1 text-xs text-amber-900 dark:bg-amber-900 dark:text-amber-100">
+  The Random button has nothing in it: Show Labels and Show Icons are both off,
+  and unlike the other two it carries no item title. It will publish as an empty
+  box that is still a link. Switch one of them back on, or switch the Random
+  button off.
+</p>
+@endif
+
+@else
+
+<!--
+  Published and preview. Everything below runs in PHP.
+
+  The wrapper element is a guard: if the page was not published as .php, the
+  browser treats this block as inert script content and shows nothing, rather
+  than printing PHP source onto the page. The guard is closed by a literal
+  closing tag at the very end, and the output is echoed after it by a second
+  PHP block - which an HTML parser swallows as a bogus comment when PHP is off.
+  Nothing between here and that closing tag may contain a literal closing
+  script tag; where one is needed it is built by concatenation.
+-->
+<script type="text/tsprevnext-guard"><?php
+
+/* Nowdoc rather than heredoc: the payload can contain a dollar sign or a
+   backslash and must reach PHP exactly as written. Elements substitutes its own
+   values before PHP ever sees this file. Assigned to a variable first so it
+   parses on every PHP version rather than 7.3 and later only. */
+$tsCfgJson = <<<'TS_PREVNEXT_CFG'
+{{configJson}}
+TS_PREVNEXT_CFG;
+
+/* Class strings come across as a second document, so styling never has to be
+   duplicated in hooks.js. Each key is one layer of one button.
+
+   Two keys are not class lists. "match" is empty unless the Match width is in
+   play, and its emptiness is what tells the renderer below whether to draw the
+   extra wrapper at all. "stroke" is a bare number bound for an SVG attribute,
+   already checked against a known list in hooks.js. */
+$tsCssJson = <<<'TS_PREVNEXT_CSS'
+{
+  "row":        "flex {{navOpacity}} {{outerSpacing}} {{gapHorizontal}} {{gapVertical}} @if(stacksOnMobile)flex-col sm:flex-row@else flex-row@endif {{rowJustify}} {{rowAlign}}",
+  "match":      "@if(widthIsMatch){{matchGrid}} {{gapHorizontal}} {{gapVertical}}@endif",
+  "button":     "group/prevnext flex min-w-0 {{growClass}} items-center justify-center gap-3 no-underline {{minWidth}} {{buttonPadding}} {{cornerRadius}} {{buttonShadow}} @if(hasHoverTransition){{hoverLift}}@endif @if(styleIsButtons){{buttonBg}} {{buttonBgHover}}@endif @if(styleIsCards){{buttonBg}} {{buttonBgHover}}@endif @if(hasBorder){{borderWidth}} {{borderStyle}} {{borderColor}} {{borderColorHover}}@endif @if(hasHoverTransition)motion-safe:transition motion-safe:{{transitionDuration}} motion-safe:{{transitionEasing}}@endif",
+  "nextExtra":  "flex-row-reverse @if(alignsToEdges)text-right@endif",
+  "disabled":   "{{disabledOpacity}} cursor-default",
+  "chevron":    "h-5 w-5 shrink-0 {{chevronColor}}",
+  "stroke":     "{{chevronStroke}}",
+  "dice":       "h-5 w-6 shrink-0 {{chevronColor}}",
+  "diceStroke": "{{diceStroke}}",
+  "image":      "h-12 w-12 shrink-0 overflow-hidden object-cover {{imageRadius}}",
+  "text":       "{{textWrapClass}}",
+  "label":      "block {{labelFont}} {{labelSize}} {{labelWeight}} {{labelTracking}} {{labelTransform}} {{labelColor}}",
+  "title":      "block {{titleClampClass}} {{titleFont}} {{titleSize}} {{titleWeight}} {{titleLeading}} {{titleColor}} {{titleColorHover}}"
+}
+TS_PREVNEXT_CSS;
+
+/* The raw region opened below runs to its closing directive just above the
+   guard's closing tag, and covers pure PHP with no Elements values in it - the
+   class document above is the last substitution. Turning the lexer off for that
+   region lets PHP that merely looks like template syntax pass through: an
+   error-suppressed call, or a brace pair inside a string.
+
+   Two rules when editing. Keep every new Elements value ABOVE this line, and
+   never name the closing directive inside the region, because naming it ends
+   the region early and the rest of the file is then lexed as template source.
+
+   Tailwind's compiler scans this file as text, so any class name the PHP
+   assembles at runtime must also appear literally somewhere it can see. Every
+   such name is listed in the class document above. */
+@raw()
+
+/* Everything from here to the return runs INSIDE a closure, and that is a
+   correctness requirement rather than a tidiness one.
+
+   A root template's PHP executes in the page's own global scope, beside whatever
+   the CMS is using to render the page around it. Until build 16 this block wrote
+   57 names into that scope, and one of them was $item: the 20 Aug 2026 Random
+   selection looped `foreach ($tsItems as $i => $item)` at the top level, so by
+   the time the page came to render its own item, $item held the last Markdown
+   file this component had looked at. Every CMS Item page on a site carrying this
+   component rendered the wrong item, from every link, whether or not the link
+   came from here. $i went the same way, and $before, $after, $status, $image,
+   $title-adjacent names and forty more had been sitting there since 1.0 waiting
+   for a page that used one of them.
+
+   A closure fixes the whole class at once rather than renaming the one that bit.
+   Nothing inside is visible to the page, and nothing the page holds is visible
+   in here except the two values passed in deliberately.
+
+   call_user_func rather than an immediately-invoked closure literal, for the
+   same reason the nowdoc above is assigned to a variable first: it parses on
+   every PHP version rather than 7.0 and later only.
+
+   Do NOT re-indent the body to match. A nowdoc terminator has to sit at column 0
+   on PHP older than 7.3, and there is one further down holding the browser
+   script. Indentation here would cost a parse error on exactly the old hosts
+   this pack is careful about. */
+$tsPrevNextOut = call_user_func(function ($tsCfgJson, $tsCssJson) {
+
+$tsCfg = json_decode($tsCfgJson, true);
+$tsCss = json_decode($tsCssJson, true);
+if (!is_array($tsCfg)) { $tsCfg = array(); }
+if (!is_array($tsCss)) { $tsCss = array(); }
+
+/* Every key the server reads, with the default it falls back to. The Inspector,
+   hooks.js and this list have to describe one set of keys AND one set of values.
+   The keys are checked automatically; the values were not, and 'showTitles' sat
+   at true here from 1.0 while the control and the hook both said false. Nothing
+   could reach it - hooks writes the key on every publish, so this column is only
+   consulted when the config fails to decode - but a fallback that contradicts
+   the Inspector is a wrong answer waiting for the one request that needs it. */
+$tsDefaults = array(
+    'collectionPath' => '',
+    'levelsUp'       => 0,
+    'orderBy'        => 'date',
+    'orderDirection' => 'desc',
+    'previousMeans'  => 'older',
+    'status'         => 'published',
+    'dateFilter'     => 'past',
+    'atEnds'         => 'hide',
+    'showsPrevious'  => true,
+    'showsNext'      => true,
+    'showsRandom'    => true,
+    'showLabels'     => true,
+    'labelPrevious'  => 'Previous',
+    'labelNext'      => 'Next',
+    'labelRandom'    => 'Random',
+    'showTitles'     => false,
+    'showChevrons'   => true,
+    'wantsImage'     => false,
+    'diagnostics'    => false,
+);
+$A = array();
+foreach ($tsDefaults as $tsK => $tsV) {
+    $A[$tsK] = array_key_exists($tsK, $tsCfg) ? $tsCfg[$tsK] : $tsV;
+}
+
+/* Closures, not named functions: a root template runs once per instance, so a
+   named function would be redeclared the moment a page carries two of these. */
+$cls = function ($key) use ($tsCss) {
+    return isset($tsCss[$key]) ? trim(preg_replace('/\s+/', ' ', (string) $tsCss[$key])) : '';
+};
+/* ENT_SUBSTITUTE because htmlspecialchars returns an empty string for text
+   that is not valid UTF-8, and a title saved in another encoding would then
+   vanish from its button and its aria-label alike. */
+$esc = function ($s) {
+    return htmlspecialchars((string) $s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+};
+
+$tsNotes = array();
+$tsOut = '';
+
+/* ---- 1. Which item is being viewed -------------------------------------
+   The slug arrives as a query parameter when Pretty URLs are off and as the
+   last path segment when they are on. Both forms are read, and whichever one
+   arrived decides how the neighbour links are written - so the setting is
+   detected rather than asked about, and can never disagree with the Collection.
+*/
+/* The path is written back into every link, so it must stay on this site. A
+   request starting with two slashes reaches the page (servers merge them) but
+   parse_url reads //post//evil.example/ as host "post" and path
+   //evil.example/, and a link built on that leaves the site. Leading slashes
+   are collapsed to one first, and a backslash, which browsers read as a slash,
+   is treated as one. */
+$tsUri = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '';
+$tsUri = (string) preg_replace('#\A/+#', '/', str_replace('\\', '/', $tsUri));
+$tsPath = (string) parse_url($tsUri, PHP_URL_PATH);
+/* And again after parsing. Apache hands over the request target exactly as it
+   was sent, so an absolute-form request line - http://site//evil.example/../post/
+   - starts with the scheme, slips past the collapse above, and parse_url then
+   returns //evil.example/../post/ as the path. No browser sends that form, but a
+   shared cache could keep the answer and give it to everyone. */
+$tsPath = (string) preg_replace('#\A/+#', '/', $tsPath);
+
+/* A query parameter names the item (whether it also means the query form is
+   settled below). A path segment is only a candidate: on a site with
+   Pretty URLs off, the last segment of /post/ is the page's own folder, not an
+   item - and taking it for a slug means searching for an item called "post",
+   finding none, and rendering nothing on the very page an author previews.
+   The candidate is promoted to a slug further down, once the item list can say
+   whether such an item exists. That same test is what decides which URL form to
+   write, so Pretty URLs are detected from evidence rather than guessed at from
+   the shape of the address. */
+$tsPretty = false;
+$tsSlug = '';
+$tsCandidate = '';
+if (isset($_GET['item']) && is_string($_GET['item']) && $_GET['item'] !== '') {
+    $tsSlug = $_GET['item'];
+} elseif ($tsPath !== '') {
+    $tsCandidate = rawurldecode(basename(rtrim($tsPath, '/')));
+}
+
+/* A slug reaches the filesystem, so it is reduced to the characters a CMS
+   filename can hold. Anything else is not a slug and is refused outright
+   rather than cleaned up into a different item. */
+$tsClean = function ($s) {
+    if ($s === '' || preg_match('/\A[A-Za-z0-9._-]+\z/', $s) !== 1) { return ''; }
+    if (strpos($s, '..') !== false || substr($s, -3) === '.md') {
+        $s = preg_replace('/\.md\z/', '', str_replace('..', '', $s));
+    }
+    return (string) $s;
+};
+if ($tsSlug !== '' && $tsClean($tsSlug) === '') {
+    $tsNotes[] = 'the item parameter did not look like a slug';
+}
+$tsSlug = $tsClean($tsSlug);
+$tsCandidate = $tsClean($tsCandidate);
+
+/* A query parameter is not proof on its own after all. Realmac's own Pretty
+   URLs recipe, for Apache and nginx alike, rewrites /post/my-item to
+   index.php?item=my-item inside the server, so PHP sees an item parameter on a
+   pretty site too, and links written as ?item= on top of that path came out as
+   /post/my-item?item=next. REQUEST_URI still holds what the visitor asked for:
+   when its own query string has no item and its last segment is the slug, the
+   request was pretty, which is the same test the CMS's detectPrettyUrls()
+   makes. A trailing slash is fine, since the recipe accepts one. */
+if ($tsSlug !== '') {
+    $tsQuery = array();
+    parse_str((string) parse_url($tsUri, PHP_URL_QUERY), $tsQuery);
+    if (!isset($tsQuery['item'])
+        && $tsClean(rawurldecode(basename(rtrim($tsPath, '/')))) === $tsSlug) {
+        $tsPretty = true;
+    }
+}
+
+/* ---- 2. Reading one item's front matter -------------------------------
+   Only the keys this component acts on are pulled out. A real YAML parser is
+   not available and not needed: the block is read line by line, one nested
+   level deep so an image block resolves, and anything else is ignored.
+*/
+$readItem = function ($file) {
+    $fh = @fopen($file, 'rb');
+    if (!$fh) { return null; }
+    /* The CMS strips a UTF-8 byte order mark before it looks for front matter
+       (ecms_normalize_text_encoding). Without the same step a file saved with
+       one read as having no front matter at all - so a draft counted as
+       published and was linked to. */
+    $first = fgets($fh, 8192);
+    if ($first !== false && substr($first, 0, 3) === "\xEF\xBB\xBF") { $first = substr($first, 3); }
+    if ($first === false || rtrim($first, "\r\n") !== '---') { fclose($fh); return array('fm' => array(), 'slug' => ''); }
+
+    $fm = array();
+    $quoted = array();
+    $slug = '';
+    $parent = '';
+    $guard = 0;
+    while (($line = fgets($fh, 8192)) !== false) {
+        if (++$guard > 400) { break; }
+        /* Text that is not UTF-8 is read as Windows-1252, which is the CMS's
+           own fallback, so an older file's accented title still reads. */
+        if (function_exists('mb_check_encoding') && !mb_check_encoding($line, 'UTF-8')) {
+            $line = mb_convert_encoding($line, 'UTF-8', 'Windows-1252');
+        }
+        $trimmed = rtrim($line, "\r\n");
+        if ($trimmed === '---' || $trimmed === '...') { break; }
+        if ($trimmed === '' || substr(ltrim($trimmed), 0, 1) === '#') { continue; }
+
+        $indented = ($trimmed !== ltrim($trimmed));
+        $pos = strpos($trimmed, ':');
+        if ($pos === false) { continue; }
+
+        $rawKey = trim(substr($trimmed, 0, $pos));
+        $key = strtolower($rawKey);
+        $val = trim(substr($trimmed, $pos + 1));
+        /* Strip one matching pair of quotes; YAML needs them for values that
+           would otherwise read as a boolean or a time. */
+        $len = strlen($val);
+        if ($len >= 2) {
+            $q = $val[0];
+            if (($q === '"' || $q === "'") && $val[$len - 1] === $q) {
+                $val = substr($val, 1, $len - 2);
+                /* And undo the escape each quote style uses. The CMS editor
+                   single-quotes any title that would not survive plain (one
+                   with ": " in it, or a leading quote) and doubles the
+                   apostrophes inside, so "Don't Stop: Live" is saved as
+                   'Don''t Stop: Live'. */
+                $val = ($q === "'")
+                    ? str_replace("''", "'", $val)
+                    : str_replace(array('\\"', '\\\\'), array('"', '\\'), $val);
+                if (!$indented) { $quoted[$key] = true; }
+            }
+        }
+
+        if ($indented && $parent !== '') {
+            $fm[$parent . '.' . $key] = $val;
+        } else {
+            $fm[$key] = $val;
+            $parent = ($val === '') ? $key : '';
+            /* Every other key is matched in any case, as it always has been
+               here. The slug is taken only in exactly this spelling, because
+               that is the only spelling the CMS reads and a slug decides where
+               a link goes: one the CMS ignores would be written into a link
+               the CMS then cannot resolve. */
+            if ($rawKey === 'slug') { $slug = $val; }
+        }
+    }
+    fclose($fh);
+    return array('fm' => $fm, 'slug' => $slug, 'quoted' => $quoted);
+};
+
+/* How the CMS names an item, read from its own runtime rather than its manual.
+   An item's slug is its front-matter slug when that is not empty; otherwise it
+   is the filename less its extension, with a leading year-month-day date and its
+   hyphen taken off, so 2024-05-01-my-song.md is my-song and 0001-my-song.md is
+   0001-my-song (four digits are not a date). Its Collection links carry that
+   slug. Looking an address up, though, it tries filenames first - the whole
+   name, then the name with such a date taken off - and reads front matter only
+   when no filename answers.
+
+   So the whole basename, prefix and all, reaches its own file whatever the
+   Collection wrote - unless another file's dated name strips down to the same
+   word and sorts ahead of it - and it is what this component writes for an item
+   with no usable slug of its own. An earlier note here said the CMS links by
+   the whole basename and that the date-stripped form would 404. For a dated
+   filename it is the other way round, and both forms resolve. */
+$slugOf = function ($filename) {
+    return preg_replace('/\.md\z/i', '', $filename);
+};
+
+/* Matching, unlike emitting, is allowed to be generous: the date-stripped form
+   is the CMS's own slug for a dated file, and an address written by hand or by
+   an older component may use it too, so that spelling is accepted as an alias
+   and never emitted. */
+$slugAltOf = function ($filename) use ($slugOf) {
+    $base = $slugOf($filename);
+    $bare = preg_replace('/\A\d{4}-\d{2}-\d{2}-/', '', $base);
+    return ($bare === $base) ? '' : $bare;
+};
+
+/* An authored slug, when the item has one this component can use. The CMS
+   takes a non-empty front-matter slug as the item's own, writes its Collection
+   links with it, and resolves it on the way back in, so a visitor arriving from
+   the Collection carries it in the address. It is honoured here only when it is
+   already something the address cleaner above would accept unchanged - the same
+   characters, no dot pair, no trailing .md - because a slug that is not could
+   never be matched against an incoming address and has no business in a link.
+   An unquoted null, true or false is not text to YAML, so the CMS does not use
+   that word as the slug either; those are refused as well. Anything refused
+   leaves the item on its filename, which is exactly where it was before. */
+$fmSlugOf = function ($raw) use ($tsClean) {
+    $s = (string) $raw;
+    if ($s === '' || $tsClean($s) !== $s) { return ''; }
+    if (in_array(strtolower($s), array('null', 'true', 'false'), true)) { return ''; }
+    return $s;
+};
+
+/* ---- 3. Finding the collection folder ---------------------------------
+   With a path configured it is resolved relative to this page, climbing first
+   if asked. With the field left empty the folder is discovered, and the test is
+   exact rather than a guess: the right folder is the one holding a file named
+   for the item currently being viewed. Nearby directories are examined in
+   widening order and the search is bounded so a deep site cannot turn a page
+   request into a filesystem walk.
+
+   Only filenames are compared in that search. Reading the front matter of every
+   file in every folder it looks at is the walk the bounds are there to prevent,
+   so an address carrying an authored slug finds no file by name and lands on
+   the nearest folder holding any items - right on a site with one collection,
+   a guess on a site with several, and why the README says to fill the field in
+   when items carry slugs of their own.
+
+   Not every Markdown file is an item, and the two kinds left out are both files
+   Elements writes itself.
+
+   A page's AI twin. With Generate AI Markdown on - the default for a new project
+   - every published page gets a Markdown copy beside it, named by swapping the
+   page's last extension, so index.php gains an index.md. Earlier builds added
+   the extension instead, giving index.html.md. Either kind sitting in a page
+   folder made that folder look like a collection: open the Item Template page
+   with no item in the address and the nearest one was the page's own folder,
+   holding one "item" called index. A Markdown file with a page of the same name
+   beside it is that page's twin and never an item, so it is skipped, and so is
+   any name ending in a page extension followed by .md. Preview writes no twins,
+   so this only ever showed on a published site.
+
+   An editor draft. The online editor writes name.draft.md while an author
+   previews unsaved changes and deletes it afterwards. Its own file list skips
+   them and so does the CMS's front-matter slug search, so this does too.
+
+   Reading carries on past the item cap rather than stopping at it, so a page
+   listed late in the directory is still seen and its twin still recognised. */
+$listMarkdown = function ($dir) {
+    /* Quiet, because a folder outside open_basedir answers with a warning. */
+    if (!@is_dir($dir) || !@is_readable($dir)) { return array(); }
+    $md = array();
+    $pages = array();
+    $dh = @opendir($dir);
+    if (!$dh) { return array(); }
+    while (($entry = readdir($dh)) !== false) {
+        if ($entry === '.' || $entry === '..') { continue; }
+        if (substr($entry, 0, 1) === '.') { continue; }
+        if (preg_match('/\.(html?|php)\z/', $entry)) { $pages[$entry] = true; continue; }
+        if (!preg_match('/\.md\z/i', $entry)) { continue; }
+        if (preg_match('/\.(html?|php|draft)\.md\z/i', $entry)) { continue; }
+        if (count($md) >= 5000) { continue; }
+        $md[] = $entry;
+    }
+    closedir($dh);
+    $found = array();
+    foreach ($md as $entry) {
+        $stem = substr($entry, 0, -3);
+        if (isset($pages[$stem . '.html']) || isset($pages[$stem . '.htm']) || isset($pages[$stem . '.php'])) { continue; }
+        $found[] = $entry;
+    }
+    sort($found);
+    return $found;
+};
+
+$tsBase = __DIR__;
+$tsDir = '';
+$tsConfigured = trim((string) $A['collectionPath']);
+if ($tsConfigured !== '') {
+    /* Levels Up is applied here only, as the Inspector and README have always
+       said: "Ignored while Collection is empty". It used to be applied before
+       this split, so with Collection empty the search below began that many
+       folders higher and could end in a folder that was not the site's at all. */
+    $tsLevels = (int) $A['levelsUp'];
+    if ($tsLevels < 0) { $tsLevels = 0; }
+    if ($tsLevels > 8) { $tsLevels = 8; }
+    for ($i = 0; $i < $tsLevels; $i++) { $tsBase = dirname($tsBase); }
+
+    /* A configured path is joined to the page, never used as an absolute path,
+       and cannot climb: the folder picker this stands in for could not express
+       one, so neither can the text field. */
+    $tsRelPath = str_replace('\\', '/', $tsConfigured);
+    $tsRelPath = preg_replace('#(\A/+)|(\.\.+)#', '', $tsRelPath);
+    $tsRelPath = trim((string) $tsRelPath, '/');
+    $candidate = $tsBase . '/' . $tsRelPath;
+    if ($tsRelPath !== '' && is_dir($candidate)) {
+        $tsDir = $candidate;
+    } else {
+        $tsNotes[] = 'the configured collection folder was not found';
+    }
+} else {
+    /* Two levels of subdirectory, not one. A published site puts the item page
+       at <root>/post/ and the content at <root>/cms/posts/ - so the folder
+       wanted is a GRANDCHILD of an ancestor, and <root>/cms itself holds no
+       Markdown at all. Probing only immediate children finds nothing on the
+       standard layout, which is exactly what happened first time out. */
+    $kids = function ($dir, $limit) {
+        $found = array();
+        $subs = @scandir($dir);
+        if (!is_array($subs)) { return $found; }
+        /* cms/ is where the CMS keeps content by default, so it is looked at
+           first: the limit below cut it off on a site with a dozen page
+           folders sorting ahead of it, and nothing was found at all. */
+        $subs = array_merge(preg_grep('/\Acms\z/i', $subs), preg_grep('/\Acms\z/i', $subs, PREG_GREP_INVERT));
+        foreach ($subs as $sub) {
+            if ($sub === '.' || $sub === '..' || substr($sub, 0, 1) === '.') { continue; }
+            /* rw/ is Elements' own asset tree and never holds CMS content. */
+            if ($sub === 'rw' || $sub === 'resources') { continue; }
+            if (!@is_dir($dir . '/' . $sub)) { continue; }
+            $found[] = $dir . '/' . $sub;
+            if (count($found) >= $limit) { break; }
+        }
+        return $found;
+    };
+
+    /* The search climbs no higher than the web root. Above it are the hosting
+       account's own folders, and whichever one held a file named after the
+       visitor's ?item= became "the collection": the titles in its front matter
+       went into the button labels and its file names into the Random list,
+       readable from a browser. A collection is always inside the published
+       site. Where the page is not under DOCUMENT_ROOT at all (a ~user or
+       aliased site), or realpath is unavailable, the climb is as before. */
+    $tsTop = '';
+    if (isset($_SERVER['DOCUMENT_ROOT']) && (string) $_SERVER['DOCUMENT_ROOT'] !== '' && function_exists('realpath')) {
+        $docRoot = @realpath((string) $_SERVER['DOCUMENT_ROOT']);
+        $here = @realpath(__DIR__);
+        if (is_string($docRoot) && is_string($here) && $docRoot !== ''
+            && ($here === $docRoot || strpos($here . '/', rtrim($docRoot, '/') . '/') === 0)) {
+            $tsTop = $docRoot;
+        }
+    }
+
+    $probe = array();
+    $walk = $tsBase;
+    for ($up = 0; $up <= 3; $up++) {
+        $probe[] = $walk;
+        foreach ($kids($walk, 12) as $child) {
+            $probe[] = $child;
+            foreach ($kids($child, 8) as $grandchild) { $probe[] = $grandchild; }
+        }
+        if ($tsTop !== '' && @realpath($walk) === $tsTop) { break; }
+        $parent = dirname($walk);
+        if ($parent === $walk) { break; }
+        $walk = $parent;
+    }
+
+    /* The CMS's own blog layout keeps author and tag profiles in authors/ and
+       tags/ folders beside posts/, and they are Markdown items too. authors/
+       sorts ahead of posts/, so a request naming no file - an authored slug, or
+       the item page opened bare, which is every Preview of it - landed on the
+       author profiles and linked to them. So those two folders are a second
+       choice: a match anywhere else wins over a match in them, and they are the
+       fallback of last resort.
+
+       Unless the page is itself an author or a tag page - Realmac's examples
+       put those at /author/ and /tag/ - where it is the other way round: the
+       profiles folder of that kind is the first choice and everything else is
+       second, so an author page opened bare, or carrying an authored slug,
+       still walks the authors. */
+    $tsPageKind = strtolower(basename(__DIR__));
+    $tsPageKind = in_array($tsPageKind, array('author', 'authors'), true) ? 'authors'
+        : (in_array($tsPageKind, array('tag', 'tags'), true) ? 'tags' : '');
+    $tsSecondChoice = function ($dir) use ($tsPageKind) {
+        $name = strtolower(basename($dir));
+        if ($tsPageKind !== '') { return $name !== $tsPageKind; }
+        return in_array($name, array('authors', 'tags'), true);
+    };
+    $looked = 0;
+    $seen = array();
+    $fallbackDir = '';
+    $laterFallback = '';
+    $laterMatch = '';
+    foreach ($probe as $dir) {
+        if (++$looked > 120) { break; }
+        if (isset($seen[$dir])) { continue; }
+        $seen[$dir] = true;
+        $files = $listMarkdown($dir);
+        if (count($files) < 1) { continue; }
+        $later = $tsSecondChoice($dir);
+        /* The first folder holding any Markdown is remembered, so a request that
+           carries no slug still has somewhere to read. A folder holding THIS
+           item is proof rather than a guess, so it wins outright. */
+        if ($later) {
+            if ($laterFallback === '') { $laterFallback = $dir; }
+        } elseif ($fallbackDir === '') {
+            $fallbackDir = $dir;
+        }
+        $wanted = ($tsSlug !== '') ? $tsSlug : $tsCandidate;
+        if ($wanted === '') { continue; }
+        foreach ($files as $f) {
+            if ($slugOf($f) === $wanted || ($slugAltOf($f) !== '' && $slugAltOf($f) === $wanted)) {
+                if (!$later) {
+                    $tsDir = $dir;
+                    break 2;
+                }
+                if ($laterMatch === '') { $laterMatch = $dir; }
+                break;
+            }
+        }
+    }
+    if ($tsDir === '' && $laterMatch !== '') { $tsDir = $laterMatch; }
+    if ($fallbackDir === '') { $fallbackDir = $laterFallback; }
+    if ($tsDir === '' && $fallbackDir !== '') {
+        $tsDir = $fallbackDir;
+        if ($tsSlug !== '') {
+            $tsNotes[] = 'no folder held a file named for this address; using the nearest folder of items';
+        }
+    }
+    if ($tsDir === '') {
+        $tsNotes[] = 'no folder of Markdown items was found near this page';
+    }
+}
+
+/* ---- 4. Build, filter and sort the list ------------------------------- */
+$tsItems = array();
+
+/* Which file the CMS would open for a given address. Built from every file in
+   the folder, not only the ones that pass the filters, because the CMS looks an
+   address up across the whole folder too. Filenames are tried first, whole and
+   then without a leading date, and front-matter slugs only when no filename
+   answers. Each map keeps the first file in name order, as the CMS's own
+   directory listing does. */
+$tsNameOwner = array();
+$tsFmOwner = array();
+if ($tsDir !== '') {
+    $now = time();
+    $wantStatus = (string) $A['status'];
+    $wantDate = (string) $A['dateFilter'];
+
+    foreach ($listMarkdown($tsDir) as $file) {
+        foreach (array($slugOf($file), $slugAltOf($file)) as $tsName) {
+            if ($tsName !== '' && !isset($tsNameOwner[$tsName])) { $tsNameOwner[$tsName] = $file; }
+        }
+        $parsed = $readItem($tsDir . '/' . $file);
+        if ($parsed === null) { continue; }
+        $fm = $parsed['fm'];
+        $own = $fmSlugOf($parsed['slug']);
+        if ($own !== '' && !isset($tsFmOwner[$own])) { $tsFmOwner[$own] = $file; }
+
+        $status = isset($fm['status']) && $fm['status'] !== '' ? strtolower($fm['status']) : 'published';
+        if ($wantStatus === 'published' && $status !== 'published') { continue; }
+        if ($wantStatus === 'draft' && $status !== 'draft') { continue; }
+
+        /* A date is documented as UTC with no timezone support. The date key
+           is read first, then a date leading the filename, and an item with
+           neither (or an unreadable one) is stamped 0, the first second of 1970
+           UTC. Such an item sorts as the oldest thing in the list, short of
+           anything dated before 1970 - last when descending, first when
+           ascending - and the sort below orders the undated ones among
+           themselves by filename, reversed when descending.
+
+           The CMS manual describes only the date key, but the CMS runtime
+           dates an item without one from a leading year-month-day date in its
+           filename, and failing that from the file's modification time.
+
+           The filename date is now read here too, as the CMS reads it: only
+           when the date key is absent or empty. Without it a scheduled item
+           named 2099-01-01-launch.md with no date key passed In the past and
+           was linked to, while the Collection hid it, and such an item sorted
+           as 1970 among dated neighbours. The modification time is still not
+           used - it moves on every upload, which would reorder a collection
+           behind its author's back - so an item with neither a date key nor a
+           dated filename is still 1970, and the README still sends such a
+           collection to ordering by File Name on both sides. */
+        $stamp = 0;
+        $dateText = (isset($fm['date']) && $fm['date'] !== '') ? (string) $fm['date'] : '';
+        if ($dateText === '' && preg_match('/\A(\d{4}-\d{2}-\d{2})-./', $slugOf($file), $tsM) === 1) {
+            $dateText = $tsM[1];
+        }
+        /* UTC is right for a date alone, and for a date and time written the
+           way YAML itself reads as a timestamp: unquoted, with seconds. The CMS
+           reads front matter with Symfony YAML, which keeps anything else - a
+           time without seconds such as "2026-10-31 09:00", the form the CMS
+           manual shows, or any quoted time - as text, and the CMS then reads
+           that text in the server's own zone. Read here as UTC, such an item
+           was linked hours early (seven on a Los Angeles host) while the
+           Collection still hid it. A date alone is read as UTC whichever way,
+           as it always was here. */
+        $dateInHostZone = $dateText !== '' && preg_match('/\d:\d\d/', $dateText) === 1
+            && (!empty($parsed['quoted']['date'])
+                || preg_match('/\A\d{4}-\d\d?-\d\d?(?:[Tt]|[ \t]+)\d\d?:\d\d:\d\d(?:\.\d*)?(?:[ \t]*(?:Z|[-+]\d\d?(?::\d\d)?))?\z/', $dateText) !== 1);
+        if ($dateText !== '') {
+            $parsedDate = $dateInHostZone ? false : strtotime($dateText . ' UTC');
+            if ($parsedDate === false) { $parsedDate = strtotime($dateText); }
+            if ($parsedDate !== false) { $stamp = $parsedDate; }
+        }
+        if ($wantDate === 'past' && $stamp > $now) { continue; }
+        if ($wantDate === 'future' && $stamp <= $now) { continue; }
+
+        $image = '';
+        foreach (array('image.src', 'image', 'thumbnail.src', 'thumbnail', 'feature_image') as $key) {
+            if (isset($fm[$key]) && $fm[$key] !== '') { $image = (string) $fm[$key]; break; }
+        }
+        if ($image !== '' && !preg_match('#\A([a-z][a-z0-9+.-]*:)?//#i', $image) && substr($image, 0, 1) !== '/') {
+            /* Resource paths in front matter are relative to the site's
+               resources folder, which is where the CMS publishes them. */
+            $image = '/resources/' . ltrim($image, '/');
+        }
+
+        $tsItems[] = array(
+            'slug'  => $slugOf($file),
+            'own'   => $own,
+            'file'  => $file,
+            /* An untitled item is named the way the CMS names it: its slug with
+               hyphens as spaces and a capital first letter, so
+               2024-05-01-my-song.md reads "My song" here and on the Collection. */
+            'title' => isset($fm['title']) && $fm['title'] !== '' ? (string) $fm['title']
+                : ucfirst(str_replace('-', ' ', ($parsed['slug'] !== '') ? $parsed['slug']
+                    : (($slugAltOf($file) !== '') ? $slugAltOf($file) : $slugOf($file)))),
+            'stamp' => $stamp,
+            'image' => $image,
+        );
+    }
+
+    /* The slug written into a link is the item's authored one only where the
+       CMS would bring that address back to this same file. A different file
+       named that way wins the lookup, and so does an earlier file claiming the
+       same slug in its front matter; either way the filename is written
+       instead, because that reaches this file by name. */
+    foreach ($tsItems as $k => $item) {
+        if ($item['own'] === '') { continue; }
+        $goesTo = isset($tsNameOwner[$item['own']]) ? $tsNameOwner[$item['own']] : $tsFmOwner[$item['own']];
+        if ($goesTo === $item['file']) { $tsItems[$k]['slug'] = $item['own']; }
+    }
+
+    /* The CMS sorts with one comparison, negated when descending, over a
+       directory listing already in filename order, so items that tie keep
+       filename order in BOTH directions. Reversing the whole list instead
+       turned same-day items round under Descending, the default, and the
+       buttons walked them the opposite way to the Collection. Titles compare
+       as the CMS compares them too, case-sensitively. */
+    $orderBy = (string) $A['orderBy'];
+    $descending = ((string) $A['orderDirection'] === 'desc');
+    usort($tsItems, function ($x, $y) use ($orderBy, $descending) {
+        if ($orderBy === 'title') {
+            $c = $x['title'] <=> $y['title'];
+        } elseif ($orderBy === 'filename') {
+            $c = strcmp($x['file'], $y['file']);
+        } else {
+            $c = ($x['stamp'] === $y['stamp']) ? 0 : (($x['stamp'] < $y['stamp']) ? -1 : 1);
+        }
+        if ($descending) { $c = -$c; }
+        if ($c !== 0) { return $c; }
+        /* Filename breaks every tie, so two items sharing a date keep one
+           stable order across requests instead of shuffling per page load.
+           Undated items are the exception, and keep the order they have always
+           had here, reversed when descending: the CMS orders them by file time,
+           which nothing here can match, and a collection of them - numbered
+           files with no dates at all - is walked in that order on live sites. */
+        $c = strcmp($x['file'], $y['file']);
+        return ($descending && $orderBy !== 'title' && $orderBy !== 'filename' && $x['stamp'] === 0) ? -$c : $c;
+    });
+}
+
+/* ---- 5. Pick the neighbours ------------------------------------------- */
+$tsPrev = null;
+$tsNext = null;
+$tsIndex = -1;
+$tsCount = count($tsItems);
+
+/* The current item is whichever file the CMS itself would open for this
+   address - a filename first, whole or without its leading date, and an
+   authored slug only when no filename answers - looked for in the filtered
+   list. It is missing from that list when Status or Date leaves it out. */
+$findIndex = function ($wanted) use ($tsItems, $tsNameOwner, $tsFmOwner) {
+    if ($wanted === '') { return -1; }
+    if (isset($tsNameOwner[$wanted])) {
+        $file = $tsNameOwner[$wanted];
+    } elseif (isset($tsFmOwner[$wanted])) {
+        $file = $tsFmOwner[$wanted];
+    } else {
+        return -1;
+    }
+    foreach ($tsItems as $i => $item) {
+        if ($item['file'] === $file) { return $i; }
+    }
+    return -1;
+};
+
+if ($tsCount > 0) {
+    $tsIndex = $findIndex($tsSlug);
+    if ($tsIndex === -1 && $tsSlug !== '') {
+        $tsNotes[] = 'this item was not in the filtered list, so it has no neighbours';
+    }
+
+    /* The path segment becomes a slug only now, when the list can confirm such
+       an item exists. That it exists is also the proof that Pretty URLs are on,
+       so the links written below take the same form the visitor arrived by. */
+    if ($tsIndex === -1 && $tsSlug === '' && $tsCandidate !== '') {
+        $found = $findIndex($tsCandidate);
+        if ($found !== -1) {
+            $tsIndex = $found;
+            $tsSlug = $tsCandidate;
+            $tsPretty = true;
+        }
+    }
+
+    /* Still nothing means the Item Template page was opened directly, which is
+       what happens every time an author previews it. Elements' own Item shows
+       the first item there rather than nothing, so this follows suit - otherwise
+       previewing the page always shows an empty space and the component looks
+       broken while it is in fact working. Match Order By and Order Direction to
+       the Collection and the two agree on which item that is. */
+    if ($tsIndex === -1 && $tsSlug === '') {
+        $tsIndex = 0;
+        $tsNotes[] = 'no item slug in the address, so the first item is treated as current';
+    }
+}
+
+if ($tsIndex !== -1 && $tsCount > 1) {
+    $loop = ((string) $A['atEnds'] === 'loop');
+    $before = ($tsIndex > 0) ? $tsItems[$tsIndex - 1] : ($loop ? $tsItems[$tsCount - 1] : null);
+    $after = ($tsIndex < $tsCount - 1) ? $tsItems[$tsIndex + 1] : ($loop ? $tsItems[0] : null);
+
+    if ((string) $A['orderBy'] === 'date') {
+        /* Older and newer are only meaningful when the list is ordered by date.
+           Which side of the current item is older depends on the direction, so
+           it is derived from the sort rather than assumed. */
+        $descending = ((string) $A['orderDirection'] === 'desc');
+        $older = $descending ? $after : $before;
+        $newer = $descending ? $before : $after;
+        if ((string) $A['previousMeans'] === 'newer') {
+            $tsPrev = $newer; $tsNext = $older;
+        } else {
+            $tsPrev = $older; $tsNext = $newer;
+        }
+    } else {
+        /* Ordered by title or filename there is no older or newer, so the
+           buttons follow the list the reader can actually see. */
+        $tsPrev = $before;
+        $tsNext = $after;
+    }
+}
+
+/* ---- 5b. Where Random goes ---------------------------------------------
+   Drawn from the same filtered, sorted list the neighbours came from, so Status
+   and Date govern it too and no draft or scheduled item can be reached this way.
+   The item being read is taken out first: a random link back to the page you are
+   already on reads as a broken button, not as bad luck.
+
+   Chosen when the page is requested, which is the whole reason this belongs on
+   the server. A destination picked while the site was being published would be
+   the same destination for every visitor until the next publish - random once,
+   then fixed. */
+$tsRandom = null;
+$tsPool = array();
+if ($A['showsRandom'] === true && $tsCount > 0) {
+    $others = array();
+    foreach ($tsItems as $i => $item) {
+        if ($i === $tsIndex) { continue; }
+        $others[] = $item;
+    }
+    if (count($others) > 0) {
+        shuffle($others);
+        $tsRandom = $others[0];
+        /* A shortlist, not the whole collection. The browser is handed a few
+           candidates so it can pick again without another request; forty of them
+           is a couple of hundred bytes, where a thousand would be page weight
+           nobody agreed to. The shortlist comes off a fresh shuffle on every
+           request, so the cap costs nothing in evenness - every item is still as
+           likely as every other to be the one offered. */
+        $tsPool = array_slice($others, 0, 40);
+    }
+}
+
+/* ---- 6. Render -------------------------------------------------------- */
+$linkFor = function ($slug) use ($tsPretty, $tsPath) {
+    if ($tsPretty) {
+        /* On a pretty URL the slug IS the last path segment - that is where it
+           was just read from - so the page is always that segment's parent.
+           The trailing slash is not the thing to test: the documented rewrite
+           accepts one, and treating a trailing slash as "no slug here" produced
+           links of the form /post/this-slug/other-slug. */
+        $dir = (string) dirname(rtrim($tsPath, '/'));
+        if ($dir === '.' || $dir === DIRECTORY_SEPARATOR) { $dir = ''; }
+        return rtrim($dir, '/') . '/' . rawurlencode($slug);
+    }
+    $page = $tsPath !== '' ? $tsPath : './';
+    return $page . '?item=' . rawurlencode($slug);
+};
+
+$chevron = function ($facing) use ($cls) {
+    $d = ($facing === 'left') ? 'M15 18 L9 12 L15 6' : 'M9 18 L15 12 L9 6';
+    $w = $cls('stroke');
+    if ($w === '') { $w = '3'; }
+    return '<svg class="' . $cls('chevron') . '" viewBox="0 0 24 24" fill="none"'
+        . ' stroke="currentColor" stroke-width="' . $w . '" stroke-linecap="round"'
+        . ' stroke-linejoin="round" aria-hidden="true"><path d="' . $d . '" /></svg>';
+};
+
+/* Two dice, drawn rather than typed. A text glyph would take the label's font
+   and the label's colour and would answer to none of the Arrow controls, so it
+   would drift out of step with the two chevrons beside it the moment either was
+   changed.
+
+   The box is wider than the chevron's, because two dice are wider than one
+   arrow. Squeezed into the chevron's square box each die comes out nine units
+   across and renders at seven or eight pixels, where the pips run together and
+   the pair reads as two smudges. On a 30-by-24 box each die is twelve units and
+   stands exactly as tall as the chevron beside it, which is what makes the three
+   buttons look like one set.
+
+   Five pips between the pair rather than a full complement: at the size this
+   renders beside a line of text a fully spotted die closes up into a block. */
+$dice = function () use ($cls) {
+    $w = $cls('diceStroke');
+    if ($w === '') { $w = '2'; }
+    return '<svg class="' . $cls('dice') . '" viewBox="0 0 30 24" fill="none"'
+        . ' stroke="currentColor" stroke-width="' . $w . '" stroke-linejoin="round"'
+        . ' aria-hidden="true">'
+        . '<rect x="1" y="6" width="12" height="12" rx="2.4" />'
+        . '<rect x="17" y="6" width="12" height="12" rx="2.4" />'
+        . '<g fill="currentColor" stroke="none">'
+        . '<circle cx="4" cy="9" r="1.4" /><circle cx="7" cy="12" r="1.4" />'
+        . '<circle cx="10" cy="15" r="1.4" /><circle cx="20" cy="9" r="1.4" />'
+        . '<circle cx="26" cy="15" r="1.4" /></g></svg>';
+};
+
+$button = function ($item, $side) use ($A, $cls, $esc, $linkFor, $chevron) {
+    $isNext = ($side === 'next');
+    $label = $isNext ? (string) $A['labelNext'] : (string) $A['labelPrevious'];
+    $classes = $cls('button');
+    if ($isNext) { $classes .= ' ' . $cls('nextExtra'); }
+
+    $inner = '';
+    if ($A['showChevrons']) { $inner .= $chevron($isNext ? 'right' : 'left'); }
+    if ($A['wantsImage'] && $item !== null && $item['image'] !== '') {
+        $inner .= '<img class="' . $cls('image') . '" src="' . $esc($item['image'])
+            . '" alt="" loading="lazy" decoding="async" />';
+    }
+
+    $text = '';
+    if ($A['showLabels'] && $label !== '') {
+        $text .= '<span class="' . $cls('label') . '">' . $esc($label) . '</span>';
+    }
+    if ($A['showTitles'] && $item !== null) {
+        $text .= '<span class="' . $cls('title') . '">' . $esc($item['title']) . '</span>';
+    }
+    if ($text !== '') { $inner .= '<span class="' . $cls('text') . '">' . $text . '</span>'; }
+
+    if ($item === null) {
+        return '<span class="' . $classes . ' ' . $cls('disabled') . '" aria-disabled="true">'
+            . $inner . '</span>';
+    }
+    $aria = $esc(($label !== '' ? $label . ': ' : '') . $item['title']);
+    return '<a class="' . $classes . '" href="' . $esc($linkFor($item['slug']))
+        . '" rel="' . ($isNext ? 'next' : 'prev') . '" aria-label="' . $aria . '">'
+        . $inner . '</a>';
+};
+
+/* Same box, same wording, same colours as the other two - it is the third of a
+   set, not a variation on one. What it does not carry is the item title or the
+   feature image, and that is the point rather than an omission: either one would
+   name the item behind the button, and a destination you can read before you
+   click it is not a random one.
+
+   The shortlist rides on the element it belongs to. A page holding two of these
+   then keeps two independent lists and neither needs an id to find the other.
+   Every entry is an address the encoder has already been over, so none of them
+   can contain a space and a space can separate them. */
+$randomButton = function ($item, $pool) use ($A, $cls, $esc, $linkFor, $dice) {
+    $label = (string) $A['labelRandom'];
+
+    $inner = '';
+    if ($A['showChevrons']) { $inner .= $dice(); }
+    if ($A['showLabels'] && $label !== '') {
+        $inner .= '<span class="' . $cls('text') . '"><span class="' . $cls('label') . '">'
+            . $esc($label) . '</span></span>';
+    }
+
+    if ($item === null) {
+        return '<span class="' . $cls('button') . ' ' . $cls('disabled') . '" aria-disabled="true">'
+            . $inner . '</span>';
+    }
+
+    $hrefs = array();
+    foreach ($pool as $candidate) { $hrefs[] = $linkFor($candidate['slug']); }
+
+    /* nofollow because the destination is different on every request. There is
+       nothing here a crawler should treat as a stable edge of the site, and
+       every page it points at is already reachable from the collection. */
+    return '<a class="' . $cls('button') . '" href="' . $esc($linkFor($item['slug']))
+        . '" rel="nofollow" data-prevnext-random="' . $esc(implode(' ', $hrefs))
+        . '" aria-label="' . $esc($label !== '' ? $label : 'A random item') . '">'
+        . $inner . '</a>';
+};
+
+$showPrev = ($A['showsPrevious'] === true);
+$showNext = ($A['showsNext'] === true);
+$showRandom = ($A['showsRandom'] === true);
+$hideEnds = ((string) $A['atEnds'] === 'hide');
+
+/* Order of assembly is the order on the page, so Random is added between the
+   two and lands in the middle of the row and of the Match grid alike. With one
+   item in the collection there is nowhere random to go, so it has an end of its
+   own and follows At The Ends exactly as the other two do. */
+$cells = array();
+if ($showPrev && !($tsPrev === null && $hideEnds)) { $cells[] = $button($tsPrev, 'prev'); }
+if ($showRandom && !($tsRandom === null && $hideEnds)) { $cells[] = $randomButton($tsRandom, $tsPool); }
+if ($showNext && !($tsNext === null && $hideEnds)) { $cells[] = $button($tsNext, 'next'); }
+
+/* The Match width needs one more element than the other two: equal columns can
+   only take their size from the widest of them inside a parent that is itself
+   sized to its content, and the row is not - it is full width, because that is
+   what centres the pair and what pushes it to the edges. An empty class is the
+   signal that this width is not in play, so the wrapper is not drawn at all and
+   the other two modes emit exactly the markup they emitted before. */
+if (count($cells) > 0) {
+    $body = implode('', $cells);
+    $matchCls = $cls('match');
+    if ($matchCls !== '') {
+        $body = '<div class="' . $matchCls . '">' . $body . '</div>';
+    }
+    $tsOut = '<div class="' . $cls('row') . '">' . $body . '</div>';
+}
+
+/* Progressive enhancement and nothing more. The address already in the button is
+   a real item chosen by the server, so Random works with scripting off, in a
+   text browser, and anywhere the markup is read rather than run.
+
+   What the script buys is the SECOND click. A page restored from the back /
+   forward cache comes back with its markup intact, so the address in the button
+   is still the one the server wrote the first time - press Back and press Random
+   and it leads straight back to the item just left. Picking again in the browser
+   answers that, and while it is there it can skip the handful of items already
+   seen this visit, which is the difference between a random walk and a coin that
+   keeps landing on the same three items out of five.
+
+   Everything it touches is feature-detected, and the storage side is inside
+   try/catch throughout: a browser told to block storage THROWS on sessionStorage
+   rather than handing back null, and an uncaught throw here would take the click
+   handler with it. Nothing is written that is not read back the same way.
+
+   Left as a nowdoc so it arrives at the browser exactly as written - a backslash
+   in a character class is not an escape sequence here - and so the check scripts
+   can lift it out by name and boot it. */
+$tsRandomJs = <<<'TS_PREVNEXT_JS'
+(function () {
+  if (window.__tsPrevNextRandom) { return; }
+  window.__tsPrevNextRandom = 1;
+
+  var KEY = "ts-prevnext-seen", KEEP = 24;
+
+  var read = function () {
+    try {
+      var raw = window.sessionStorage.getItem(KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return (list instanceof Array) ? list : [];
+    } catch (e) { return []; }
+  };
+
+  var mark = function (url) {
+    try {
+      var list = read();
+      if (list[list.length - 1] !== url) {
+        list.push(url);
+        window.sessionStorage.setItem(KEY, JSON.stringify(list.slice(-KEEP)));
+      }
+    } catch (e) {}
+  };
+
+  /* What gets remembered is the ITEM, not the address it was reached by, and the
+     two are not the same string. The server writes a pretty link with no trailing
+     slash and a query link with the page path left exactly as it arrived - which
+     on a folder-style page is /post/ - so a page recorded by stripping its own
+     trailing slash was stored as /post?item=x while every candidate in the pool
+     read /post/?item=x. Those can never match, so the skip-what-you-have-seen
+     half of this quietly did nothing on every site with Pretty URLs off. It also
+     misses whenever a visitor arrives carrying an extra parameter, because the
+     server emits ?item= alone.
+
+     Reducing both sides to the slug settles all of it at once and depends on
+     neither the URL style nor what else is in the query string. */
+  var keyOf = function (u) {
+    var m = /[?&]item=([^&#]*)/.exec(u);
+    if (m) { return m[1]; }
+    var s = u.split(/[?#]/)[0].replace(/\/+$/, "");
+    return s.slice(s.lastIndexOf("/") + 1);
+  };
+
+  mark(keyOf(location.pathname + location.search));
+
+  var roll = function (a) {
+    var pool = (a.getAttribute("data-prevnext-random") || "").split(/\s+/).filter(Boolean);
+    if (!pool.length) { return; }
+    var seen = read();
+    var fresh = pool.filter(function (u) { return seen.indexOf(keyOf(u)) < 0; });
+    var from = fresh.length ? fresh : pool;
+    var pick = from[Math.floor(Math.random() * from.length)];
+    if (pick) { a.setAttribute("href", pick); }
+  };
+
+  var tap = function (e) {
+    var t = e.target;
+    if (!t || !t.closest) { return; }
+    var a = t.closest("a[data-prevnext-random]");
+    if (a) { roll(a); }
+  };
+
+  document.addEventListener("click", tap, true);
+  document.addEventListener("auxclick", tap, true);
+})();
+TS_PREVNEXT_JS;
+
+/* Once per page, however many of these are on it - the script binds one
+   delegated listener to the document and finds every button through it. A root
+   template runs once per instance, so the flag has to outlive this instance.
+
+   The closing tag is built in two pieces on purpose. A literal one anywhere in
+   this file would close the guard element above ahead of time, and a page not
+   published as .php would then print the PHP source instead of quietly
+   rendering nothing. */
+if ($tsRandom !== null && count($tsPool) > 1 && !isset($GLOBALS['tsPrevNextRandomJs'])) {
+    $GLOBALS['tsPrevNextRandomJs'] = true;
+    $tsOut .= '<script>' . $tsRandomJs . '</' . 'script>';
+}
+
+/* Diagnostics are a comment in the source rather than anything on the page, so
+   switching them on cannot disturb a live layout while an author is looking for
+   the reason nothing rendered. */
+if ($A['diagnostics'] === true) {
+    $rows = array(
+        'folder'    => ($tsDir !== '' ? $tsDir : 'not found'),
+        'configured' => (trim((string) $A['collectionPath']) !== '' ? (string) $A['collectionPath'] : 'empty, discovered'),
+        'slug'      => ($tsSlug !== '' ? $tsSlug : 'none in the address'),
+        'urls'      => ($tsPretty ? 'pretty' : 'query string'),
+        'items'     => (string) $tsCount,
+        'position'  => ($tsIndex === -1 ? 'not in list' : (string) ($tsIndex + 1)),
+        'previous'  => ($tsPrev === null ? 'none' : $tsPrev['slug']),
+        'next'      => ($tsNext === null ? 'none' : $tsNext['slug']),
+        'random'    => ($tsRandom === null ? 'off, or nowhere to go'
+                        : $tsRandom['slug'] . ' picked from ' . count($tsPool) . ' offered'),
+    );
+    $note = '';
+    foreach ($rows as $k => $v) {
+        $note .= $k . ': ' . str_replace(array('--', '>'), ' ', (string) $v) . '; ';
+    }
+    foreach ($tsNotes as $n) { $note .= 'note: ' . str_replace(array('--', '>'), ' ', $n) . '; '; }
+    $tsOut .= '<!-- prev/next: ' . $note . '-->';
+}
+
+return $tsOut;
+
+}, $tsCfgJson, $tsCssJson);
+
+?></script><?php echo $tsPrevNextOut; ?>
+@endraw
+
+@endif
