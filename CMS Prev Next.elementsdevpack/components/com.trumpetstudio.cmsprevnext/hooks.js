@@ -258,7 +258,6 @@ const transformHook = (rw) => {
         isEdit: isEdit,
 
         styleIsCards: styleIsCards,
-        styleIsLinks: styleIsLinks,
         styleIsButtons: styleIsButtons,
         hasBorder: (p.showBorder ?? false) === true && !styleIsLinks,
         hasHoverTransition: (p.hasHoverTransition ?? true) === true,
@@ -280,8 +279,6 @@ const transformHook = (rw) => {
         showsTitles: showTitles === true,
         showsChevrons: showChevrons === true,
         wantsImage: wantsImage,
-
-        endsDisable: atEnds === "disable",
 
         titleClampClass: CLAMP[titleClamp] || "line-clamp-none",
 

@@ -227,10 +227,10 @@
               }
             ]
           },
-          "info": "Buttons draws a bordered box each side. Text drops the box and border. Cards adds the item's feature image.",
+          "info": "Buttons draws a box each side. Text drops the box. Cards adds the item's feature image.",
           "ai": {
             "name": "buttonStyle",
-            "description": "Overall treatment: bordered buttons, bare text links, or cards with a feature image.",
+            "description": "Overall treatment: boxed buttons, bare text links, or cards with a feature image.",
             "values": [
               "buttons",
               "links",
@@ -352,11 +352,11 @@
           "responsive": false,
           "switch": {
             "default": true,
-            "subtitle": "The small Previous / Next wording."
+            "subtitle": "The Previous / Next wording."
           },
           "ai": {
             "name": "showLabels",
-            "description": "Show the small Previous and Next wording above each item title."
+            "description": "Show the Previous and Next wording on the buttons."
           }
         },
         {

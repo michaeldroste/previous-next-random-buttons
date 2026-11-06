@@ -198,6 +198,13 @@ TS_PREVNEXT_CSS;
    script. Indentation here would cost a parse error on exactly the old hosts
    this pack is careful about. */
 $tsPrevNextOut = call_user_func(function ($tsCfgJson, $tsCssJson) {
+/* The net for everything below, closed at the foot of this function. On PHP 8 a
+   function a host has listed in disable_functions is simply undefined, and
+   calling one throws an Error that an at sign does not stop: opendir, say,
+   which the CMS never calls, so the CMS could run fine while this took the rest
+   of the page down. This component is a convenience, so a failure costs the
+   component and nothing else. */
+try {
 
 $tsCfg = json_decode($tsCfgJson, true);
 $tsCss = json_decode($tsCssJson, true);
@@ -265,6 +272,10 @@ $tsOut = '';
    are collapsed to one first, and a backslash, which browsers read as a slash,
    is treated as one. */
 $tsUri = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '';
+/* Browsers delete tabs and newlines from an address before reading it, so a raw
+   one between two slashes would pass the collapse below as two separate slashes
+   and still come out as //host in the link. A real request line carries none. */
+$tsUri = (string) preg_replace('/[\x00-\x20\x7F]+/', '', $tsUri);
 $tsUri = (string) preg_replace('#\A/+#', '/', str_replace('\\', '/', $tsUri));
 $tsPath = (string) parse_url($tsUri, PHP_URL_PATH);
 /* And again after parsing. Apache hands over the request target exactly as it
@@ -286,8 +297,17 @@ $tsPath = (string) preg_replace('#\A/+#', '/', $tsPath);
 $tsPretty = false;
 $tsSlug = '';
 $tsCandidate = '';
-if (isset($_GET['item']) && is_string($_GET['item']) && $_GET['item'] !== '') {
+/* With Pretty URLs off, which is the CMS's default, its author and tag links
+   read ?author=name and ?tag=name rather than ?item=name. A page in a folder of
+   that name reads its own parameter and writes it back into its links. */
+$tsPageFolder = strtolower(basename(__DIR__));
+$tsParam = in_array($tsPageFolder, array('author', 'authors'), true) ? 'author'
+    : (in_array($tsPageFolder, array('tag', 'tags'), true) ? 'tag' : 'item');
+if (isset($_GET[$tsParam]) && is_string($_GET[$tsParam]) && $_GET[$tsParam] !== '') {
+    $tsSlug = $_GET[$tsParam];
+} elseif (isset($_GET['item']) && is_string($_GET['item']) && $_GET['item'] !== '') {
     $tsSlug = $_GET['item'];
+    $tsParam = 'item';
 } elseif ($tsPath !== '') {
     $tsCandidate = rawurldecode(basename(rtrim($tsPath, '/')));
 }
@@ -319,7 +339,7 @@ $tsCandidate = $tsClean($tsCandidate);
 if ($tsSlug !== '') {
     $tsQuery = array();
     parse_str((string) parse_url($tsUri, PHP_URL_QUERY), $tsQuery);
-    if (!isset($tsQuery['item'])
+    if (!isset($tsQuery[$tsParam])
         && $tsClean(rawurldecode(basename(rtrim($tsPath, '/')))) === $tsSlug) {
         $tsPretty = true;
     }
@@ -358,12 +378,27 @@ $readItem = function ($file) {
         if ($trimmed === '' || substr(ltrim($trimmed), 0, 1) === '#') { continue; }
 
         $indented = ($trimmed !== ltrim($trimmed));
+        /* Indented text under a key that already has a value is more of that
+           value: the body of a block such as "excerpt: |". A line in it reading
+           "Status: sold out" or "slug: other" was taken for the real key, which
+           dropped the item from the buttons or sent the link somewhere else. */
+        if ($indented && $parent === '') { continue; }
         $pos = strpos($trimmed, ':');
         if ($pos === false) { continue; }
 
         $rawKey = trim(substr($trimmed, 0, $pos));
         $key = strtolower($rawKey);
         $val = trim(substr($trimmed, $pos + 1));
+        /* A comment after the value is not part of it. Kept, it made
+           "date: 2099-01-01 # embargoed" unreadable as a date, so a scheduled
+           item counted as old and was linked to, and "status: published # ok"
+           matched no status at all. YAML needs a space before the hash, so
+           "song#1" is untouched, and "Song #1" reads "Song", as the CMS reads it. */
+        if ($val !== '' && ($val[0] === '"' || $val[0] === "'")) {
+            if (preg_match('/\A("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\']|\'\')*\')[ \t]+#/', $val, $tsQ) === 1) { $val = $tsQ[1]; }
+        } else {
+            $val = rtrim((string) preg_replace('/(?:\A|[ \t])#.*\z/', '', $val));
+        }
         /* Strip one matching pair of quotes; YAML needs them for values that
            would otherwise read as a boolean or a time. */
         $len = strlen($val);
@@ -385,6 +420,11 @@ $readItem = function ($file) {
 
         if ($indented && $parent !== '') {
             $fm[$parent . '.' . $key] = $val;
+        } elseif ($key === 'status' && $rawKey !== 'status') {
+            /* Status decides whether an item is shown at all, and the CMS's keys are
+               case-sensitive: it ignores "Status: Sold out" and lists the item, so
+               this must too, without touching a real "status:" read elsewhere. */
+            $parent = ($val === '') ? $key : '';
         } else {
             $fm[$key] = $val;
             $parent = ($val === '') ? $key : '';
@@ -416,7 +456,10 @@ $readItem = function ($file) {
    the whole basename and that the date-stripped form would 404. For a dated
    filename it is the other way round, and both forms resolve. */
 $slugOf = function ($filename) {
-    return preg_replace('/\.md\z/i', '', $filename);
+    /* The name only: in a tree of subfolders a file arrives as year/name.md, and
+       the CMS's public slug never carries the folder. */
+    $tsBare = strrchr('/' . $filename, '/');
+    return preg_replace('/\.md\z/i', '', substr((string) $tsBare, 1));
 };
 
 /* Matching, unlike emitting, is allowed to be generous: the date-stripped form
@@ -492,7 +535,9 @@ $listMarkdown = function ($dir) {
         if ($entry === '.' || $entry === '..') { continue; }
         if (substr($entry, 0, 1) === '.') { continue; }
         if (preg_match('/\.(html?|php)\z/', $entry)) { $pages[$entry] = true; continue; }
-        if (!preg_match('/\.md\z/i', $entry)) { continue; }
+        /* Lower case only, as the CMS's own file pattern is: NAME.MD is not an
+           item to it, and a link to one opens an empty page. */
+        if (!preg_match('/\.md\z/', $entry)) { continue; }
         if (preg_match('/\.(html?|php|draft)\.md\z/i', $entry)) { continue; }
         if (count($md) >= 5000) { continue; }
         $md[] = $entry;
@@ -505,6 +550,54 @@ $listMarkdown = function ($dir) {
         $found[] = $entry;
     }
     sort($found);
+    return $found;
+};
+
+/* Subfolders. From Elements 3.1.5 a licensed CMS install reads a collection's
+   nested folders too: the Collection lists those items among the rest, and their
+   public slug is still just the item's slug, not the folder path. Read one level
+   only, the buttons disappeared on every nested item (it was not in the list)
+   and walked past all of them from everywhere else.
+
+   So the walk follows what the CMS is really doing on this install, and the CMS
+   is asked rather than the author, the same way Pretty URLs are detected rather
+   than configured. Where the CMS is not loaded yet, or is older than 3.1.5, the
+   answer is no and one folder is read, as it always was. Nothing here reads
+   further than the CMS itself would.
+
+   Its rules are followed: folders and files whose names begin with a dot, and
+   folders beginning with an underscore, are not walked. Links out of the folder
+   are not followed at all, which is narrower than the CMS and cannot loop. The
+   bounds keep a page request from turning into a walk of a very large tree. */
+$tsTree = false;
+if (class_exists('CMS\\Collection') && method_exists('CMS\\Collection', 'includesSubfolders')) {
+    try {
+        $tsTree = (\CMS\Collection::includesSubfolders() === true);
+    } catch (\Throwable $tsAskFailed) {
+        $tsTree = false;
+    }
+}
+$listTree = function ($root) use ($listMarkdown) {
+    $found = array();
+    $stack = array('');
+    $dirs = 0;
+    while (count($stack) > 0 && $dirs < 500 && count($found) < 5000) {
+        $dirs++;
+        $rel = array_pop($stack);
+        $abs = ($rel === '') ? $root : $root . '/' . $rel;
+        foreach ($listMarkdown($abs) as $entry) {
+            $found[] = ($rel === '') ? $entry : $rel . '/' . $entry;
+        }
+        $subs = @scandir($abs);
+        if (!is_array($subs)) { continue; }
+        foreach ($subs as $sub) {
+            $first = substr($sub, 0, 1);
+            if ($first === '.' || $first === '_') { continue; }
+            if (@is_link($abs . '/' . $sub) || !@is_dir($abs . '/' . $sub)) { continue; }
+            $stack[] = ($rel === '') ? $sub : $rel . '/' . $sub;
+        }
+    }
+    sort($found, SORT_STRING);
     return $found;
 };
 
@@ -569,8 +662,11 @@ if ($tsConfigured !== '') {
     if (isset($_SERVER['DOCUMENT_ROOT']) && (string) $_SERVER['DOCUMENT_ROOT'] !== '' && function_exists('realpath')) {
         $docRoot = @realpath((string) $_SERVER['DOCUMENT_ROOT']);
         $here = @realpath(__DIR__);
+        /* Compared with forward slashes, because on a Windows host both come back
+           with backslashes and the test could then never match, leaving the climb
+           unstopped. */
         if (is_string($docRoot) && is_string($here) && $docRoot !== ''
-            && ($here === $docRoot || strpos($here . '/', rtrim($docRoot, '/') . '/') === 0)) {
+            && strpos(str_replace('\\', '/', $here) . '/', rtrim(str_replace('\\', '/', $docRoot), '/') . '/') === 0) {
             $tsTop = $docRoot;
         }
     }
@@ -605,16 +701,21 @@ if ($tsConfigured !== '') {
     $tsPageKind = strtolower(basename(__DIR__));
     $tsPageKind = in_array($tsPageKind, array('author', 'authors'), true) ? 'authors'
         : (in_array($tsPageKind, array('tag', 'tags'), true) ? 'tags' : '');
+    /* A folder beginning with an underscore is one the CMS treats as hidden, and
+       the character sorts ahead of every lower-case name, so cms/_templates beside
+       cms/posts was taken for the collection. A second choice rather than never,
+       so a site that really does keep its items in such a folder still works. */
     $tsSecondChoice = function ($dir) use ($tsPageKind) {
         $name = strtolower(basename($dir));
         if ($tsPageKind !== '') { return $name !== $tsPageKind; }
-        return in_array($name, array('authors', 'tags'), true);
+        return in_array($name, array('authors', 'tags'), true) || substr($name, 0, 1) === '_';
     };
     $looked = 0;
     $seen = array();
     $fallbackDir = '';
     $laterFallback = '';
     $laterMatch = '';
+    $tsHolders = array();
     foreach ($probe as $dir) {
         if (++$looked > 120) { break; }
         if (isset($seen[$dir])) { continue; }
@@ -630,6 +731,7 @@ if ($tsConfigured !== '') {
         } elseif ($fallbackDir === '') {
             $fallbackDir = $dir;
         }
+        if (!$later) { $tsHolders[] = $dir; }
         $wanted = ($tsSlug !== '') ? $tsSlug : $tsCandidate;
         if ($wanted === '') { continue; }
         foreach ($files as $f) {
@@ -640,6 +742,22 @@ if ($tsConfigured !== '') {
                 }
                 if ($laterMatch === '') { $laterMatch = $dir; }
                 break;
+            }
+        }
+    }
+    /* A nested item is deeper than the search looks, so where the CMS reads
+       subfolders each folder already holding items is asked whether the item is
+       somewhere beneath it. The deepest asks first: a stray README.md at the top
+       of a site would otherwise claim every file on it. */
+    $tsNested = ($tsSlug !== '') ? $tsSlug : $tsCandidate;
+    if ($tsTree && $tsDir === '' && $laterMatch === '' && $tsNested !== '') {
+        usort($tsHolders, function ($x, $y) { return strlen($y) - strlen($x); });
+        foreach ($tsHolders as $dir) {
+            foreach ($listTree($dir) as $f) {
+                if ($slugOf($f) === $tsNested || ($slugAltOf($f) !== '' && $slugAltOf($f) === $tsNested)) {
+                    $tsDir = $dir;
+                    break 2;
+                }
             }
         }
     }
@@ -672,7 +790,8 @@ if ($tsDir !== '') {
     $wantStatus = (string) $A['status'];
     $wantDate = (string) $A['dateFilter'];
 
-    foreach ($listMarkdown($tsDir) as $file) {
+    $tsSeenSlugs = array();
+    foreach (($tsTree ? $listTree($tsDir) : $listMarkdown($tsDir)) as $file) {
         foreach (array($slugOf($file), $slugAltOf($file)) as $tsName) {
             if ($tsName !== '' && !isset($tsNameOwner[$tsName])) { $tsNameOwner[$tsName] = $file; }
         }
@@ -681,6 +800,15 @@ if ($tsDir !== '') {
         $fm = $parsed['fm'];
         $own = $fmSlugOf($parsed['slug']);
         if ($own !== '' && !isset($tsFmOwner[$own])) { $tsFmOwner[$own] = $file; }
+
+        /* Across subfolders two files can share a slug, and the Collection then
+           lists only the first it comes to, before any filter runs. */
+        if ($tsTree) {
+            $tsSeenKey = ($parsed['slug'] !== '') ? $parsed['slug']
+                : (($slugAltOf($file) !== '') ? $slugAltOf($file) : $slugOf($file));
+            if (isset($tsSeenSlugs[$tsSeenKey])) { continue; }
+            $tsSeenSlugs[$tsSeenKey] = true;
+        }
 
         $status = isset($fm['status']) && $fm['status'] !== '' ? strtolower($fm['status']) : 'published';
         if ($wantStatus === 'published' && $status !== 'published') { continue; }
@@ -708,22 +836,31 @@ if ($tsDir !== '') {
            dated filename is still 1970, and the README still sends such a
            collection to ordering by File Name on both sides. */
         $stamp = 0;
+        $tsDateKey = 'date';
         $dateText = (isset($fm['date']) && $fm['date'] !== '') ? (string) $fm['date'] : '';
+        /* The CMS's other date field, which it sorts by when the date key is
+           absent. Without it every such item counted as 1970. */
+        if ($dateText === '' && isset($fm['date_published']) && $fm['date_published'] !== '') {
+            $tsDateKey = 'date_published';
+            $dateText = (string) $fm['date_published'];
+        }
+        $dateFromName = false;
         if ($dateText === '' && preg_match('/\A(\d{4}-\d{2}-\d{2})-./', $slugOf($file), $tsM) === 1) {
             $dateText = $tsM[1];
+            $dateFromName = true;
         }
-        /* UTC is right for a date alone, and for a date and time written the
-           way YAML itself reads as a timestamp: unquoted, with seconds. The CMS
-           reads front matter with Symfony YAML, which keeps anything else - a
-           time without seconds such as "2026-10-31 09:00", the form the CMS
-           manual shows, or any quoted time - as text, and the CMS then reads
-           that text in the server's own zone. Read here as UTC, such an item
-           was linked hours early (seven on a Los Angeles host) while the
-           Collection still hid it. A date alone is read as UTC whichever way,
-           as it always was here. */
-        $dateInHostZone = $dateText !== '' && preg_match('/\d:\d\d/', $dateText) === 1
-            && (!empty($parsed['quoted']['date'])
-                || preg_match('/\A\d{4}-\d\d?-\d\d?(?:[Tt]|[ \t]+)\d\d?:\d\d:\d\d(?:\.\d*)?(?:[ \t]*(?:Z|[-+]\d\d?(?::\d\d)?))?\z/', $dateText) !== 1);
+        /* UTC is right only for what YAML itself reads as a timestamp: unquoted,
+           a date alone or a date and time with seconds. The CMS reads front
+           matter with Symfony YAML, which keeps anything else as text, and the
+           CMS then reads that text in the server's own zone. That covers a time
+           without seconds such as "2026-10-31 09:00", the form the CMS manual
+           shows; anything quoted, which includes every date the online editor
+           writes; and a date taken from the filename. Read here as UTC, such an
+           item was linked hours early (seven on a Los Angeles host) while the
+           Collection still hid it. */
+        $dateInHostZone = $dateText !== '' && ($dateFromName
+            || !empty($parsed['quoted'][$tsDateKey])
+            || preg_match('/\A\d{4}-\d\d?-\d\d?(?:(?:[Tt]|[ \t]+)\d\d?:\d\d:\d\d(?:\.\d*)?(?:[ \t]*(?:Z|[-+]\d\d?(?::\d\d)?))?)?\z/', $dateText) !== 1);
         if ($dateText !== '') {
             $parsedDate = $dateInHostZone ? false : strtotime($dateText . ' UTC');
             if ($parsedDate === false) { $parsedDate = strtotime($dateText); }
@@ -763,10 +900,29 @@ if ($tsDir !== '') {
        same slug in its front matter; either way the filename is written
        instead, because that reaches this file by name. */
     foreach ($tsItems as $k => $item) {
-        if ($item['own'] === '') { continue; }
+        if ($item['own'] === '') {
+            /* With no slug of its own, a dated file's address on the Collection
+               is its name less the date. Writing the whole name gave every such
+               item a second public address, and the Random button then failed to
+               recognise an item the visitor had reached from the Collection. The
+               whole name stays only where the short one would open another file. */
+            $tsAlt = $slugAltOf($item['file']);
+            if ($tsAlt !== '' && isset($tsNameOwner[$tsAlt]) && $tsNameOwner[$tsAlt] === $item['file']) {
+                $tsItems[$k]['slug'] = $tsAlt;
+            }
+            continue;
+        }
         $goesTo = isset($tsNameOwner[$item['own']]) ? $tsNameOwner[$item['own']] : $tsFmOwner[$item['own']];
         if ($goesTo === $item['file']) { $tsItems[$k]['slug'] = $item['own']; }
     }
+
+    /* The address cleaner refuses a name holding a space or an accent, so a link
+       written to one arrives as "no item" and that page's Previous then pointed
+       at itself: the reader could not get past it. Such an item is left out of
+       the walk instead. The allowlist itself stays as it is. */
+    $tsItems = array_values(array_filter($tsItems, function ($item) use ($tsClean) {
+        return $tsClean($item['slug']) === $item['slug'];
+    }));
 
     /* The CMS sorts with one comparison, negated when descending, over a
        directory listing already in filename order, so items that tie keep
@@ -832,7 +988,12 @@ if ($tsCount > 0) {
        an item exists. That it exists is also the proof that Pretty URLs are on,
        so the links written below take the same form the visitor arrived by. */
     if ($tsIndex === -1 && $tsSlug === '' && $tsCandidate !== '') {
-        $found = $findIndex($tsCandidate);
+        /* Not when that segment is only the page's own folder: /news/ opened bare,
+           on a site with an item called news, was taken for that item and its
+           links dropped the folder. /news/news is still that item. */
+        $tsOwnFolder = ($tsCandidate === basename(__DIR__))
+            && basename(dirname(rtrim($tsPath, '/'))) !== $tsCandidate;
+        $found = $tsOwnFolder ? -1 : $findIndex($tsCandidate);
         if ($found !== -1) {
             $tsIndex = $found;
             $tsSlug = $tsCandidate;
@@ -841,11 +1002,9 @@ if ($tsCount > 0) {
     }
 
     /* Still nothing means the Item Template page was opened directly, which is
-       what happens every time an author previews it. Elements' own Item shows
-       the first item there rather than nothing, so this follows suit - otherwise
-       previewing the page always shows an empty space and the component looks
-       broken while it is in fact working. Match Order By and Order Direction to
-       the Collection and the two agree on which item that is. */
+       what happens every time an author previews it. The first item is treated
+       as current there, because otherwise previewing the page always shows an
+       empty space and the component looks broken while it is in fact working. */
     if ($tsIndex === -1 && $tsSlug === '') {
         $tsIndex = 0;
         $tsNotes[] = 'no item slug in the address, so the first item is treated as current';
@@ -909,7 +1068,7 @@ if ($A['showsRandom'] === true && $tsCount > 0) {
 }
 
 /* ---- 6. Render -------------------------------------------------------- */
-$linkFor = function ($slug) use ($tsPretty, $tsPath) {
+$linkFor = function ($slug) use ($tsPretty, $tsPath, $tsParam) {
     if ($tsPretty) {
         /* On a pretty URL the slug IS the last path segment - that is where it
            was just read from - so the page is always that segment's parent.
@@ -921,7 +1080,7 @@ $linkFor = function ($slug) use ($tsPretty, $tsPath) {
         return rtrim($dir, '/') . '/' . rawurlencode($slug);
     }
     $page = $tsPath !== '' ? $tsPath : './';
-    return $page . '?item=' . rawurlencode($slug);
+    return $page . '?' . $tsParam . '=' . rawurlencode($slug);
 };
 
 $chevron = function ($facing) use ($cls) {
@@ -984,7 +1143,7 @@ $button = function ($item, $side) use ($A, $cls, $esc, $linkFor, $chevron) {
     if ($text !== '') { $inner .= '<span class="' . $cls('text') . '">' . $text . '</span>'; }
 
     if ($item === null) {
-        return '<span class="' . $classes . ' ' . $cls('disabled') . '" aria-disabled="true">'
+        return '<span class="' . $classes . ' ' . $cls('disabled') . '" role="link" aria-disabled="true">'
             . $inner . '</span>';
     }
     $aria = $esc(($label !== '' ? $label . ': ' : '') . $item['title']);
@@ -1014,7 +1173,7 @@ $randomButton = function ($item, $pool) use ($A, $cls, $esc, $linkFor, $dice) {
     }
 
     if ($item === null) {
-        return '<span class="' . $cls('button') . ' ' . $cls('disabled') . '" aria-disabled="true">'
+        return '<span class="' . $cls('button') . ' ' . $cls('disabled') . '" role="link" aria-disabled="true">'
             . $inner . '</span>';
     }
 
@@ -1117,7 +1276,7 @@ $tsRandomJs = <<<'TS_PREVNEXT_JS'
      Reducing both sides to the slug settles all of it at once and depends on
      neither the URL style nor what else is in the query string. */
   var keyOf = function (u) {
-    var m = /[?&]item=([^&#]*)/.exec(u);
+    var m = /[?&](?:item|author|tag)=([^&#]*)/.exec(u);
     if (m) { return m[1]; }
     var s = u.split(/[?#]/)[0].replace(/\/+$/, "");
     return s.slice(s.lastIndexOf("/") + 1);
@@ -1169,6 +1328,7 @@ if ($A['diagnostics'] === true) {
         'configured' => (trim((string) $A['collectionPath']) !== '' ? (string) $A['collectionPath'] : 'empty, discovered'),
         'slug'      => ($tsSlug !== '' ? $tsSlug : 'none in the address'),
         'urls'      => ($tsPretty ? 'pretty' : 'query string'),
+        'subfolders' => ($tsTree ? 'read, as the CMS reads them here' : 'not read'),
         'items'     => (string) $tsCount,
         'position'  => ($tsIndex === -1 ? 'not in list' : (string) ($tsIndex + 1)),
         'previous'  => ($tsPrev === null ? 'none' : $tsPrev['slug']),
@@ -1185,6 +1345,11 @@ if ($A['diagnostics'] === true) {
 }
 
 return $tsOut;
+
+} catch (\Throwable $tsFailure) {
+    return (isset($A['diagnostics']) && $A['diagnostics'] === true)
+        ? '<!-- prev/next: stopped by ' . get_class($tsFailure) . ' -->' : '';
+}
 
 }, $tsCfgJson, $tsCssJson);
 

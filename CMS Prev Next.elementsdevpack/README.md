@@ -17,9 +17,9 @@ through the MCP server, can find and change it from a plain-language request.
 Both of these are how the Elements CMS works, not choices this component makes.
 
 1. **It has to sit inside a CMS Item**, in the Before or After drop zone. It
-   needs to know which item is being viewed, and outside that context there is
-   no current item to have neighbours. Placed anywhere else it renders nothing.
-   Related Items behaves the same way for the same reason.
+   needs to know which item is being viewed. Placed anywhere else the address
+   names no item, so it treats the first item in the list as current, and its
+   buttons have nothing to do with the page they are on.
 
 2. **The page has to be published with a `.php` extension**, like every CMS
    page. The neighbours are worked out when the page is requested, not when you
@@ -409,6 +409,16 @@ so a changed default only ever reaches a *new* Prev / Next. The rule throughout
 is whether your project already had a stored value to keep: if it did, the update
 cannot touch it, and the setting has to be changed by hand.
 
+**Build 27 needs nothing from you.** For authors with a dated filename and no
+`slug:`, links now read `/post/my-song`, as the Collection's do, rather than
+`/post/2026-11-02-my-song`; the old addresses still open. On an author or tag page
+with Pretty URLs off, links now read `?author=` or `?tag=`, which is what those
+pages use. A date the online editor wrote, or one taken from a filename, is now
+read in your server's time zone as the CMS reads it, so a scheduled item can
+appear up to a few hours earlier or later than it did here, and in step with the
+Collection. A host that disables a function this component needs now loses the
+component rather than the rest of the page.
+
 **The version number jumps from 1 to 2 at build 18, and nothing in the component
 changed because of that.** It is a numbering change only — the build number
 carries straight on from 17, so 1.17 is the build before 2.18 and no build went
@@ -562,9 +572,11 @@ most people will get.
 
 - **Front matter is read simply.** The block at the top of each file is parsed
   line by line, one nested level deep, which is enough for `title`, `date`,
-  `status`, `slug` and an `image:` block. Anything more elaborate is ignored rather than
-  misread. Front matter must use spaces, not tabs — a YAML rule, but this is
-  where you would notice it.
+  `status`, `slug` and an `image:` block. A comment after a value and the body of
+  a `|` or `>` block are left out, as YAML says. Anything more elaborate is
+  ignored rather than misread. `status` counts only in that spelling, because
+  the CMS's keys are case-sensitive and it ignores `Status:`. Front matter must
+  use spaces, not tabs — a YAML rule, but this is where you would notice it.
 
 - **A missing date is taken from the filename** when the filename starts with
   one, as the CMS does, so a scheduled `2099-01-01-launch.md` stays hidden under
@@ -594,15 +606,29 @@ most people will get.
   whole filename as well as the date-stripped one, and an authored slug only when
   no filename answers. This component follows the same rules when it decides
   which item is current. The links it writes use the item's own `slug:` where
-  the CMS will bring that address back to the same item, and the whole filename
-  otherwise, which always reaches its own file.
+  the CMS will bring that address back to the same item. Otherwise they use what
+  the Collection writes, the filename less any leading date, and the whole
+  filename only where the shorter form would open a different file.
 
 - **An authored `slug:` is used only if it is made of letters, digits, dots,
   hyphens and underscores.** Anything else — a space, an accented letter, a
   slash — is never written into a link, and an address carrying one is refused
   outright, the same as any other address that does not look like a slug. That
   page then shows the first item's buttons rather than its own, so keep authored
-  slugs to those characters.
+  slugs to those characters. The same goes for a filename with no `slug:` of its
+  own: `Night in Tunisia.md` is left out of the walk, because a link to it could
+  never come back. Elements' own editor cannot make such a name; only a file
+  uploaded by hand can have one.
+
+- **Subfolders follow the CMS.** From Elements 3.1.5 a licensed CMS install also
+  reads the folders inside a collection, and lists those items among the rest.
+  This component asks the CMS whether it is doing that and walks the same items,
+  by the same rules: folders beginning with `.` or `_` are skipped, and two
+  files sharing a slug count once. Without a licence, on an older CMS, or on a
+  page where the CMS has not loaded yet, one folder is read. The automatic search
+  finds a nested item only beneath a folder that holds items of its own, so a
+  collection made entirely of subfolders needs **Collection** filled in. Links
+  out of the folder are not followed.
 
 - **Only `.md` files are items here.** The CMS will also read items saved as
   `.markdown` or `.txt`, but Elements' own editor writes `.md` only, so this
@@ -621,8 +647,6 @@ most people will get.
 
 - **Opening the Item Template page with no item in the address** shows the first
   item's navigation rather than nothing, which is what makes Preview useful.
-  Elements' own Item behaves the same way. Match Order By and Order Direction to
-  the Collection and both agree on which item "first" is.
 
 - **Feature images.** A relative `image: src:` is resolved against
   `/resources/`, where the CMS publishes them. An absolute path or a full URL is
@@ -674,7 +698,8 @@ server-side at all.
 The usual causes, in order:
 
 1. **The page is not `.php`.** Nothing renders, by design.
-2. **The component is not inside a CMS Item.** There is no current item.
+2. **The component is on a page with no current item.** It then walks from the
+   first item, so check it sits inside a CMS Item.
 3. **The folder was not found.** Fill in Collection, and Levels Up if the
    content sits above the page. Diagnostics names the folder it settled on.
 4. **Only one item passes the filters.** With one item there are no neighbours
